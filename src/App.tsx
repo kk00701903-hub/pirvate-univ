@@ -116,119 +116,239 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
 ─────────────────────────────────────────────── */
 function SettingsPanel({
   levels,
+  records,
+  totalScore,
   onSave,
+  onAddRecord,
   onClose,
 }: {
   levels: LevelConfig[];
+  records: DayRecord[];
+  totalScore: number;
   onSave: (updated: LevelConfig[]) => void;
+  onAddRecord: (record: DayRecord) => void;
   onClose: () => void;
 }) {
   const [draft, setDraft] = useState<LevelConfig[]>(
     levels.map((l) => ({ ...l, schools: [...l.schools] })),
   );
+  const [tab, setTab] = useState<'levels' | 'recovery'>('levels');
+
+  /* 점수 복구 상태 */
+  const [recDate, setRecDate] = useState(getTodayString());
+  const [recScore, setRecScore] = useState(3);
+  const [recNote, setRecNote] = useState('');
+  const [recMsg, setRecMsg] = useState('');
 
   const updateSchools = (idx: number, raw: string) => {
     const schools = raw.split(',').map((s) => s.trim()).filter(Boolean);
     setDraft((prev) => prev.map((l, i) => (i === idx ? { ...l, schools } : l)));
   };
-
   const updateField = (idx: number, field: 'name' | 'subtitle', val: string) => {
     setDraft((prev) => prev.map((l, i) => (i === idx ? { ...l, [field]: val } : l)));
   };
-
   const handleReset = () => {
-    if (confirm('기본값으로 초기화할까요?')) setDraft(DEFAULT_LEVELS.map((l) => ({ ...l, schools: [...l.schools] })));
+    if (confirm('기본값으로 초기화할까요?'))
+      setDraft(DEFAULT_LEVELS.map((l) => ({ ...l, schools: [...l.schools] })));
+  };
+
+  const handleAddRecord = () => {
+    if (!recDate) return;
+    const already = records.find((r) => r.date === recDate);
+    if (already) {
+      setRecMsg(`⚠️ ${recDate} 날짜는 이미 기록이 있습니다.`);
+      return;
+    }
+    onAddRecord({ date: recDate, score: recScore, note: recNote });
+    setRecMsg(`✅ ${recDate} · ${recScore}점 추가됨! (현재 누적: ${Math.min(100, totalScore + recScore)}점)`);
+    setRecNote('');
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="bg-white rounded-3xl w-full max-w-[780px] max-h-[88vh] flex flex-col shadow-2xl">
+
         {/* 헤더 */}
-        <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100">
-          <h2 className="text-2xl font-bold text-slate-800">레벨 설정</h2>
-          <div className="flex gap-3">
-            <button
-              onClick={handleReset}
-              className="text-sm text-slate-500 hover:text-slate-700 px-4 py-2 rounded-xl hover:bg-slate-100"
-            >
-              기본값 복원
-            </button>
-            <button
-              onClick={() => onSave(draft)}
-              className="text-sm font-bold text-white px-5 py-2 rounded-xl"
-              style={{ background: '#004b8d' }}
-            >
-              저장
-            </button>
-            <button
-              onClick={onClose}
-              className="text-slate-400 hover:text-slate-600 text-2xl leading-none px-2"
-            >
+        <div className="flex items-center justify-between px-8 py-5 border-b border-slate-100">
+          <div className="flex gap-2">
+            {(['levels', 'recovery'] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all ${
+                  tab === t
+                    ? 'text-white shadow'
+                    : 'text-slate-500 hover:bg-slate-100'
+                }`}
+                style={tab === t ? { background: '#004b8d' } : {}}
+              >
+                {t === 'levels' ? '🏫 레벨 설정' : '🔧 점수 복구'}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2 items-center">
+            {tab === 'levels' && (
+              <>
+                <button
+                  onClick={handleReset}
+                  className="text-sm text-slate-500 hover:text-slate-700 px-4 py-2 rounded-xl hover:bg-slate-100"
+                >
+                  기본값 복원
+                </button>
+                <button
+                  onClick={() => onSave(draft)}
+                  className="text-sm font-bold text-white px-5 py-2 rounded-xl"
+                  style={{ background: '#004b8d' }}
+                >
+                  저장
+                </button>
+              </>
+            )}
+            <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-2xl leading-none px-2">
               ✕
             </button>
           </div>
         </div>
 
-        {/* 레벨 목록 */}
-        <div className="overflow-y-auto px-8 py-6 space-y-5">
-          {draft.map((level, idx) => (
-            <div
-              key={idx}
-              className="rounded-2xl p-5 border-2"
-              style={{ borderColor: level.color + '55', background: level.color + '08' }}
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-2xl">{level.emoji}</span>
-                <div
-                  className="text-xs font-bold text-white px-3 py-1 rounded-full"
-                  style={{ background: level.color }}
-                >
-                  Lv.{idx + 1} · {level.min}~{level.max}점
+        {/* 탭: 레벨 설정 */}
+        {tab === 'levels' && (
+          <div className="overflow-y-auto px-8 py-6 space-y-5">
+            {draft.map((level, idx) => (
+              <div key={idx} className="rounded-2xl p-5 border-2"
+                style={{ borderColor: level.color + '55', background: level.color + '08' }}>
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-2xl">{level.emoji}</span>
+                  <div className="text-xs font-bold text-white px-3 py-1 rounded-full"
+                    style={{ background: level.color }}>
+                    Lv.{idx + 1} · {level.min}~{level.max}점
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <label className="text-xs text-slate-500 mb-1 block">레벨 이름</label>
+                    <input className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                      value={level.name} onChange={(e) => updateField(idx, 'name', e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-500 mb-1 block">부제목</label>
+                    <input className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                      value={level.subtitle} onChange={(e) => updateField(idx, 'subtitle', e.target.value)} />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-slate-500 mb-1 block">
+                    대학 목록 <span className="text-slate-400">(쉼표로 구분)</span>
+                  </label>
+                  <input className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    value={level.schools.join(', ')}
+                    onChange={(e) => updateSchools(idx, e.target.value)}
+                    placeholder="예: 충남대, 전남대, 강원대" />
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {level.schools.map((s) => (
+                      <span key={s} className="text-xs px-2 py-0.5 rounded-full text-white"
+                        style={{ background: level.color }}>{s}</span>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3 mb-3">
-                <div>
-                  <label className="text-xs text-slate-500 mb-1 block">레벨 이름</label>
-                  <input
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                    value={level.name}
-                    onChange={(e) => updateField(idx, 'name', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-slate-500 mb-1 block">부제목</label>
-                  <input
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                    value={level.subtitle}
-                    onChange={(e) => updateField(idx, 'subtitle', e.target.value)}
-                  />
-                </div>
-              </div>
+            ))}
+          </div>
+        )}
+
+        {/* 탭: 점수 복구 */}
+        {tab === 'recovery' && (
+          <div className="overflow-y-auto px-8 py-6 space-y-6">
+
+            {/* 현재 누적 점수 표시 */}
+            <div className="rounded-2xl bg-slate-50 border border-slate-200 p-5 flex items-center gap-4">
+              <div className="text-4xl font-black text-slate-700">{totalScore}</div>
               <div>
-                <label className="text-xs text-slate-500 mb-1 block">
-                  대학 목록 <span className="text-slate-400">(쉼표로 구분)</span>
-                </label>
-                <input
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                  value={level.schools.join(', ')}
-                  onChange={(e) => updateSchools(idx, e.target.value)}
-                  placeholder="예: 충남대, 전남대, 강원대"
-                />
-                <div className="flex flex-wrap gap-1.5 mt-2">
-                  {level.schools.map((s) => (
-                    <span
-                      key={s}
-                      className="text-xs px-2 py-0.5 rounded-full text-white"
-                      style={{ background: level.color }}
-                    >
-                      {s}
-                    </span>
-                  ))}
-                </div>
+                <p className="font-semibold text-slate-700">현재 누적 점수</p>
+                <p className="text-sm text-slate-400">기록된 별점의 합계 (최대 100점)</p>
+              </div>
+              <div className="ml-auto text-right">
+                <p className="text-sm text-slate-500">{records.length}일 기록됨</p>
               </div>
             </div>
-          ))}
-        </div>
+
+            {/* 날짜별 점수 직접 추가 */}
+            <div className="rounded-2xl border-2 border-orange-200 bg-orange-50 p-6">
+              <h3 className="font-bold text-slate-700 text-lg mb-1">📅 날짜별 점수 추가</h3>
+              <p className="text-sm text-slate-500 mb-5">
+                기록이 사라진 날짜의 점수를 직접 입력해서 복구하세요.
+              </p>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="text-xs text-slate-500 mb-1 block font-medium">날짜 선택</label>
+                  <input
+                    type="date"
+                    className="w-full border border-slate-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-orange-300 bg-white"
+                    value={recDate}
+                    max={getTodayString()}
+                    onChange={(e) => { setRecDate(e.target.value); setRecMsg(''); }}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-500 mb-1 block font-medium">별점</label>
+                  <div className="flex gap-2 items-center h-[46px]">
+                    {[1,2,3,4,5].map((n) => (
+                      <button
+                        key={n}
+                        onClick={() => setRecScore(n)}
+                        className="text-3xl transition-transform hover:scale-110 active:scale-90"
+                        style={{ filter: n <= recScore ? 'none' : 'grayscale(1) opacity(0.25)' }}
+                      >⭐</button>
+                    ))}
+                    <span className="text-sm font-bold text-slate-600 ml-1">{recScore}점</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="text-xs text-slate-500 mb-1 block font-medium">메모 (선택)</label>
+                <input
+                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 bg-white"
+                  placeholder="예: 복구된 기록"
+                  value={recNote}
+                  onChange={(e) => setRecNote(e.target.value)}
+                />
+              </div>
+              <button
+                onClick={handleAddRecord}
+                className="w-full py-3 rounded-2xl font-bold text-white text-base transition-all active:scale-95"
+                style={{ background: '#ea580c' }}
+              >
+                이 날짜 점수 추가
+              </button>
+              {recMsg && (
+                <p className="mt-3 text-sm text-center font-medium text-slate-600 bg-white rounded-xl py-2 px-4 border border-slate-200">
+                  {recMsg}
+                </p>
+              )}
+            </div>
+
+            {/* 기존 기록 목록 */}
+            {records.length > 0 && (
+              <div>
+                <h3 className="font-semibold text-slate-600 text-sm mb-3">현재 저장된 기록 ({records.length}개)</h3>
+                <ul className="space-y-1.5 max-h-48 overflow-y-auto">
+                  {[...records].sort((a, b) => b.date.localeCompare(a.date)).map((r) => (
+                    <li key={r.date} className="flex items-center gap-3 bg-slate-50 rounded-xl px-4 py-2.5">
+                      <span className="text-sm text-slate-500 w-24 shrink-0">{r.date}</span>
+                      <div className="flex">
+                        {[1,2,3,4,5].map((n) => (
+                          <span key={n} className="text-sm"
+                            style={{ filter: n <= r.score ? 'none' : 'grayscale(1) opacity(0.2)' }}>⭐</span>
+                        ))}
+                      </div>
+                      {r.note && <span className="text-xs text-slate-400 truncate">· {r.note}</span>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
       </div>
     </div>
   );
@@ -343,6 +463,10 @@ export default function App() {
     setShowSettings(false);
   };
 
+  const handleAddRecord = (record: DayRecord) => {
+    setRecords((prev) => [...prev, record]);
+  };
+
   /* 기기에 JSON 파일로 저장 */
   const handleExport = () => {
     const data = { exportedAt: new Date().toISOString(), records };
@@ -367,7 +491,14 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex flex-col items-center px-6 py-10">
       {showSettings && (
-        <SettingsPanel levels={levels} onSave={handleSaveLevels} onClose={() => setShowSettings(false)} />
+        <SettingsPanel
+          levels={levels}
+          records={records}
+          totalScore={totalScore}
+          onSave={handleSaveLevels}
+          onAddRecord={handleAddRecord}
+          onClose={() => setShowSettings(false)}
+        />
       )}
 
       <div className="w-full max-w-[820px]">
