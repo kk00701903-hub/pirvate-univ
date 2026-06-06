@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
-  base: './',
+  base: '/pirvate-univ/',
   build: {
     outDir: 'dist',
   },

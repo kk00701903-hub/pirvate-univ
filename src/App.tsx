@@ -22,28 +22,31 @@ type DayRecord = {
 
 /* ───────────────────────────────────────────────
    기본 레벨 데이터 (식품공학과 기준 · 5단계)
+   BASE_URL: GitHub Pages 서브디렉토리 경로 대응
 ─────────────────────────────────────────────── */
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');  // '/pirvate-univ'
+
 const DEFAULT_LEVELS: LevelConfig[] = [
   { name: '레벨 1',
     subtitle: '지방 국립대 · 식품공학과',
     schools: ['충남대 식품공학과', '강원대 식품생명공학과'],
-    min: 0, max: 19, color: '#6b7280', emoji: '🌱', logo: '/logos/level1.png' },
+    min: 0, max: 19, color: '#6b7280', emoji: '🌱', logo: `${BASE}/logos/level1.png` },
   { name: '레벨 2',
     subtitle: '수도권 대학 · 식품공학과',
     schools: ['인하대 식품영양학과', '단국대 식품영양학과'],
-    min: 20, max: 39, color: '#10b981', emoji: '🌿', logo: '/logos/level2.png' },
+    min: 20, max: 39, color: '#10b981', emoji: '🌿', logo: `${BASE}/logos/level2.png` },
   { name: '레벨 3',
     subtitle: '인서울 · 식품공학과',
     schools: ['경희대 식품생명공학과', '중앙대 식품공학전공', '동국대 식품생명공학과', '세종대 식품생명공학과'],
-    min: 40, max: 59, color: '#3b82f6', emoji: '🌳', logo: '/logos/level3.png' },
+    min: 40, max: 59, color: '#3b82f6', emoji: '🌳', logo: `${BASE}/logos/level3.png` },
   { name: '레벨 4',
     subtitle: '인서울 상위 · 식품공학과',
     schools: ['한양대(서울) 식품영양학과', '성균관대 식품생명공학과'],
-    min: 60, max: 79, color: '#f59e0b', emoji: '🔥', logo: '/logos/level4.png' },
+    min: 60, max: 79, color: '#f59e0b', emoji: '🔥', logo: `${BASE}/logos/level4.png` },
   { name: '레벨 5',
     subtitle: '최종 목표',
     schools: ['고려대 식품공학과'],
-    min: 80, max: 100, color: '#004b8d', emoji: '🏆', logo: '/logos/level5.png' },
+    min: 80, max: 100, color: '#004b8d', emoji: '🏆', logo: `${BASE}/logos/level5.png` },
 ];
 
 const STORAGE_KEY = 'univer_records';
