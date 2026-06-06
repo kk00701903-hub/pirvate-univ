@@ -17,13 +17,53 @@ function LogoOrEmoji({ logo, emoji }: { logo: string; emoji: string }) {
   );
 }
 
+/**
+ * 식품공학과/식품영양학과/식품생명공학과 기준 레벨
+ * 2024~2026 정시·수시 입결 데이터 반영
+ */
 const UNIVERSITY_LEVELS = [
-  { name: '지방 전문대', min: 0, max: 19, color: '#6b7280', emoji: '🌱', logo: '/logos/level1.svg' },
-  { name: '지방 4년제', min: 20, max: 39, color: '#10b981', emoji: '🌿', logo: '/logos/level2.svg' },
-  { name: '인서울 하위', min: 40, max: 59, color: '#3b82f6', emoji: '🌳', logo: '/logos/level3.svg' },
-  { name: '인서울 중위', min: 60, max: 79, color: '#8b5cf6', emoji: '⭐', logo: '/logos/level4.svg' },
-  { name: '인서울 상위', min: 80, max: 94, color: '#f59e0b', emoji: '🔥', logo: '/logos/level5.svg' },
-  { name: '고려대학교', min: 95, max: 100, color: '#004b8d', emoji: '🏆', logo: '/logos/level6.svg' },
+  {
+    name: '지방 전문대',
+    subtitle: '식품계열 전문대',
+    schools: ['각 지역 전문대 식품관련학과'],
+    min: 0, max: 19,
+    color: '#6b7280', emoji: '🌱', logo: '/logos/level1.svg',
+  },
+  {
+    name: '지방 국립/사립대',
+    subtitle: '식품공학과',
+    schools: ['부산대', '경북대', '충남대', '전남대', '강원대', '인하대'],
+    min: 20, max: 39,
+    color: '#10b981', emoji: '🌿', logo: '/logos/level2.svg',
+  },
+  {
+    name: '인서울 하위',
+    subtitle: '식품공학·생명공학과',
+    schools: ['서울과기대', '건국대', '동국대', '서울여대', '숙명여대'],
+    min: 40, max: 59,
+    color: '#3b82f6', emoji: '🌳', logo: '/logos/level3.svg',
+  },
+  {
+    name: '인서울 중위',
+    subtitle: '식품공학·영양학과',
+    schools: ['경희대', '중앙대', '이화여대', '한양대(에리카)'],
+    min: 60, max: 79,
+    color: '#8b5cf6', emoji: '⭐', logo: '/logos/level4.svg',
+  },
+  {
+    name: '인서울 상위',
+    subtitle: '식품공학·영양학과',
+    schools: ['한양대(서울)', '연세대', '서울대'],
+    min: 80, max: 94,
+    color: '#f59e0b', emoji: '🔥', logo: '/logos/level5.svg',
+  },
+  {
+    name: '고려대학교',
+    subtitle: '식품공학과 (최종 목표)',
+    schools: ['고려대학교 식품공학과'],
+    min: 95, max: 100,
+    color: '#004b8d', emoji: '🏆', logo: '/logos/level6.svg',
+  },
 ];
 
 const STORAGE_KEY = 'univer_records';
@@ -100,12 +140,20 @@ export default function App() {
         className="w-full max-w-md rounded-2xl p-6 mb-6 text-white shadow-lg"
         style={{ background: level.color }}
       >
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-3">
           <LogoOrEmoji logo={level.logo} emoji={level.emoji} />
           <div>
-            <p className="text-white/70 text-sm">현재 레벨</p>
-            <p className="text-2xl font-bold">{level.name}</p>
+            <p className="text-white/70 text-xs">현재 레벨</p>
+            <p className="text-2xl font-bold leading-tight">{level.name}</p>
+            <p className="text-white/80 text-xs mt-0.5">{level.subtitle}</p>
           </div>
+        </div>
+        <div className="flex flex-wrap gap-1 mb-3">
+          {level.schools.map((s) => (
+            <span key={s} className="text-xs bg-white/20 rounded-full px-2 py-0.5">
+              {s}
+            </span>
+          ))}
         </div>
         <div className="bg-white/20 rounded-full h-3 overflow-hidden">
           <div
