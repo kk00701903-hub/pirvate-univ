@@ -123,29 +123,32 @@ const ThemeCtx = createContext<Tokens>(LIGHT);
 const useTheme = () => useContext(ThemeCtx);
 
 /* ══════════════════════════════════════════════
-   레벨 카드 그라데이션  — 테마별, 9단계
+   레벨 카드 그라데이션
+   Light: 흰색 계열 (레벨별 파스텔 틴트)
+   Dark : 파란색 계열 (딥 네이비 베이스)
 ══════════════════════════════════════════════ */
 const GRAD_LIGHT = [
-  { from: '#dde3ea', to: '#94a3b8', text: '#1e293b' },  // Lv1 slate    충남대
-  { from: '#99f6e4', to: '#2dd4bf', text: '#134e4a' },  // Lv2 teal     인하대
-  { from: '#bae6fd', to: '#38bdf8', text: '#0c4a6e' },  // Lv3 sky      서울과기대
-  { from: '#c7d2fe', to: '#818cf8', text: '#1e1b4b' },  // Lv4 indigo   단국대
-  { from: '#ddd6fe', to: '#a78bfa', text: '#2e1065' },  // Lv5 violet   세종대
-  { from: '#fed7aa', to: '#fb923c', text: '#7c2d12' },  // Lv6 orange   동국대
-  { from: '#bbf7d0', to: '#4ade80', text: '#14532d' },  // Lv7 green    경희대
-  { from: '#fde68a', to: '#fbbf24', text: '#78350f' },  // Lv8 amber    성균관대
-  { from: '#fecaca', to: '#f87171', text: '#7f1d1d' },  // Lv9 crimson  고려대
+  { from: '#ffffff', to: '#f1f5f9', text: '#1e293b' },  // Lv1 순백·슬레이트
+  { from: '#f0fffe', to: '#ccfbf1', text: '#134e4a' },  // Lv2 흰색·틸
+  { from: '#f0f9ff', to: '#bae6fd', text: '#0c4a6e' },  // Lv3 흰색·스카이
+  { from: '#f5f3ff', to: '#ddd6fe', text: '#1e1b4b' },  // Lv4 흰색·인디고
+  { from: '#faf5ff', to: '#e9d5ff', text: '#2e1065' },  // Lv5 흰색·바이올렛
+  { from: '#fff7ed', to: '#fed7aa', text: '#7c2d12' },  // Lv6 흰색·오렌지
+  { from: '#f0fdf4', to: '#bbf7d0', text: '#14532d' },  // Lv7 흰색·그린
+  { from: '#fffbeb', to: '#fde68a', text: '#78350f' },  // Lv8 흰색·앰버
+  { from: '#fff1f2', to: '#fecdd3', text: '#7f1d1d' },  // Lv9 흰색·크림슨
 ];
+
 const GRAD_DARK = [
-  { from: '#1c2d3e', to: '#2d4257', text: '#cbd5e1' },  // Lv1 dark slate
-  { from: '#0a3530', to: '#0f5249', text: '#99f6e4' },  // Lv2 dark teal
-  { from: '#0a2540', to: '#0d3d66', text: '#bae6fd' },  // Lv3 dark sky
-  { from: '#16185a', to: '#252880', text: '#c7d2fe' },  // Lv4 dark indigo
-  { from: '#1f0d4a', to: '#33136e', text: '#ddd6fe' },  // Lv5 dark violet
-  { from: '#4a1800', to: '#7c2d12', text: '#fed7aa' },  // Lv6 dark orange
-  { from: '#052e16', to: '#14532d', text: '#bbf7d0' },  // Lv7 dark green
-  { from: '#4a2700', to: '#78350f', text: '#fde68a' },  // Lv8 dark amber
-  { from: '#4a0a0a', to: '#7f1d1d', text: '#fecaca' },  // Lv9 dark crimson
+  { from: '#0e1c2e', to: '#1c3450', text: '#e2e8f0' },  // Lv1 다크 스틸 블루
+  { from: '#0a1e32', to: '#0e3452', text: '#99f6e4' },  // Lv2 다크 틸 블루
+  { from: '#0a1628', to: '#0d2e60', text: '#bae6fd' },  // Lv3 다크 로열 블루
+  { from: '#0a1628', to: '#14196a', text: '#c7d2fe' },  // Lv4 다크 인디고 블루
+  { from: '#0a1628', to: '#1b145e', text: '#ddd6fe' },  // Lv5 다크 바이올렛 블루
+  { from: '#0a1628', to: '#192c54', text: '#bae6fd' },  // Lv6 다크 세룰리안
+  { from: '#0a1628', to: '#0d2c4a', text: '#a5f3fc' },  // Lv7 다크 오션 블루
+  { from: '#0a1628', to: '#102440', text: '#93c5fd' },  // Lv8 다크 미드나이트
+  { from: '#0a1222', to: '#1e0a18', text: '#fecaca' },  // Lv9 다크 크림슨 (최종)
 ];
 
 /* ══════════════════════════════════════════════
