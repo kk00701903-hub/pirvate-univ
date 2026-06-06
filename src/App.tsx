@@ -70,18 +70,40 @@ function getLevel(totalScore: number, levels: LevelConfig[]) {
 }
 
 /* ───────────────────────────────────────────────
-   로고/이모지 컴포넌트
+   레벨 로고 영역 컴포넌트
+   - 로고 파일(PNG/SVG) 있으면 표시
+   - 없으면 점선 플레이스홀더 + 파일명 안내
 ─────────────────────────────────────────────── */
-function LogoOrEmoji({ logo, emoji }: { logo: string; emoji: string }) {
+function LevelLogoArea({ logo, levelIdx }: { logo: string; levelIdx: number }) {
   const [failed, setFailed] = useState(false);
-  if (failed) return <span className="text-6xl">{emoji}</span>;
+
+  if (!failed) {
+    return (
+      <div className="relative w-28 h-28 shrink-0">
+        <img
+          src={logo}
+          alt={`레벨 ${levelIdx + 1} 로고`}
+          className="w-full h-full object-contain rounded-2xl bg-white/15 p-1.5 shadow-inner"
+          onError={() => setFailed(true)}
+        />
+        <span className="absolute -bottom-1 -right-1 text-[10px] bg-white/30 text-white rounded-full px-1.5 py-0.5 font-bold">
+          Lv.{levelIdx + 1}
+        </span>
+      </div>
+    );
+  }
+
+  /* 로고 없을 때 — 점선 플레이스홀더 */
   return (
-    <img
-      src={logo}
-      alt={emoji}
-      className="w-24 h-24 object-contain rounded-2xl bg-white/20 p-2"
-      onError={() => setFailed(true)}
-    />
+    <div className="w-28 h-28 shrink-0 relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-white/40 bg-white/10 gap-1 cursor-default select-none">
+      <span className="text-3xl opacity-60">🖼️</span>
+      <span className="text-[10px] text-white/60 font-medium text-center leading-tight px-1">
+        level{levelIdx + 1}.png
+      </span>
+      <span className="absolute -bottom-1 -right-1 text-[10px] bg-white/30 text-white rounded-full px-1.5 py-0.5 font-bold">
+        Lv.{levelIdx + 1}
+      </span>
+    </div>
   );
 }
 
@@ -219,11 +241,27 @@ function SettingsPanel({
             {draft.map((level, idx) => (
               <div key={idx} className="rounded-2xl p-5 border-2"
                 style={{ borderColor: level.color + '55', background: level.color + '08' }}>
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-2xl">{level.emoji}</span>
-                  <div className="text-xs font-bold text-white px-3 py-1 rounded-full"
-                    style={{ background: level.color }}>
-                    Lv.{idx + 1} · {level.min}~{level.max}점
+                <div className="flex items-center justify-between gap-3 mb-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{level.emoji}</span>
+                    <div className="text-xs font-bold text-white px-3 py-1 rounded-full"
+                      style={{ background: level.color }}>
+                      Lv.{idx + 1} · {level.min}~{level.max}점
+                    </div>
+                  </div>
+                  {/* 로고 미리보기 */}
+                  <div className="relative w-14 h-14 shrink-0 rounded-xl border-2 border-dashed flex items-center justify-center overflow-hidden"
+                    style={{ borderColor: level.color + '88', background: level.color + '10' }}>
+                    <img
+                      src={level.logo}
+                      alt=""
+                      className="w-full h-full object-contain p-1"
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex'; }}
+                    />
+                    <div className="hidden absolute inset-0 flex-col items-center justify-center gap-0.5">
+                      <span className="text-lg">🖼️</span>
+                      <span className="text-[9px] font-medium" style={{ color: level.color }}>level{idx + 1}.png</span>
+                    </div>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3 mb-3">
@@ -550,7 +588,7 @@ export default function App() {
               </div>
             </div>
             <div className="ml-6 shrink-0">
-              <LogoOrEmoji logo={level.logo} emoji={level.emoji} />
+              <LevelLogoArea logo={level.logo} levelIdx={levels.indexOf(level)} />
             </div>
           </div>
           <div className="bg-white/20 rounded-full h-4 overflow-hidden mt-2">
