@@ -214,6 +214,32 @@ function getLevel(s: number, ls: LevelConfig[]) {
   return ls.find((l) => s >= l.min && s <= l.max) ?? ls[0];
 }
 
+/** localStorage 안전 저장 (QuotaExceededError 방어) */
+function lsSet(key: string, value: string): boolean {
+  try { localStorage.setItem(key, value); return true; }
+  catch { return false; }
+}
+
+/** DayRecord 배열 유효성 검사 — 손상된 항목 필터링 */
+function validateRecords(raw: unknown): DayRecord[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter(
+    (r): r is DayRecord =>
+      r !== null && typeof r === 'object' &&
+      typeof (r as DayRecord).date === 'string' &&
+      /^\d{4}-\d{2}-\d{2}$/.test((r as DayRecord).date) &&
+      typeof (r as DayRecord).score === 'number' &&
+      (r as DayRecord).score >= 1 && (r as DayRecord).score <= 5
+  );
+}
+
+/** 중복 날짜 제거 (최신 값 유지) */
+function dedupeRecords(recs: DayRecord[]): DayRecord[] {
+  const map = new Map<string, DayRecord>();
+  for (const r of recs) map.set(r.date, r);
+  return [...map.values()].sort((a, b) => a.date.localeCompare(b.date));
+}
+
 /* ══════════════════════════════════════════════
    로고 영역  240 × 240
 ══════════════════════════════════════════════ */
@@ -303,13 +329,15 @@ function ThemePicker({ value, onChange }: {
 /* ══════════════════════════════════════════════
    설정 패널
 ══════════════════════════════════════════════ */
-function SettingsPanel({ levels, records, totalScore, themeId, onSave, onAddRecord, onThemeChange, onClose }: {
+function SettingsPanel({ levels, records, totalScore, themeId, onSave, onAddRecord, onThemeChange, onClose, onExport, onImport }: {
   levels: LevelConfig[]; records: DayRecord[]; totalScore: number;
   themeId: ThemeId;
   onSave: (u: LevelConfig[]) => void;
   onAddRecord: (r: DayRecord) => void;
   onThemeChange: (t: ThemeId) => void;
   onClose: () => void;
+  onExport: () => void;
+  onImport: () => void;
 }) {
   const th = useTheme();
   const [draft, setDraft]       = useState<LevelConfig[]>(levels.map((l) => ({ ...l, schools: [...l.schools] })));
@@ -435,6 +463,7 @@ function SettingsPanel({ levels, records, totalScore, themeId, onSave, onAddReco
         {/* 탭: 점수 복구 */}
         {tab==='recovery' && (
           <div className="overflow-y-auto px-7 py-6 space-y-4">
+            {/* 현재 점수 요약 */}
             <div className="rounded-2xl p-5 flex items-center gap-5 border"
               style={{ background:th.rowBg, borderColor:th.rowBorder }}>
               <div className="text-5xl font-black" style={{ color:th.tabActive }}>{totalScore.toLocaleString()}</div>
@@ -444,6 +473,30 @@ function SettingsPanel({ levels, records, totalScore, themeId, onSave, onAddReco
                   {records.length}일 기록 · 누적 {records.reduce((s,r)=>s+r.score,0).toLocaleString()}점
                   / 목표 {LV9_THRESHOLD.toLocaleString()}점
                 </p>
+              </div>
+            </div>
+
+            {/* 백업 / 복원 */}
+            <div className="rounded-2xl p-5 border" style={{ background:th.rowBg, borderColor:th.rowBorder }}>
+              <p className="font-bold text-base mb-3" style={{ color:th.textH }}>💾 데이터 백업 / 복원</p>
+              <p className="text-sm mb-4" style={{ color:th.textSub }}>
+                기기를 바꾸거나 앱을 재설치할 때 JSON 파일로 기록을 안전하게 이동할 수 있습니다.
+                <br/>
+                <span className="font-semibold" style={{ color:th.textLabel }}>
+                  ⚠️ PWA(홈 화면) 모드와 Safari 브라우저는 저장소가 분리됩니다.
+                </span>
+              </p>
+              <div className="flex gap-3">
+                <button onClick={onExport}
+                  className="flex-1 py-3 rounded-xl font-bold text-base transition-all active:scale-95 flex items-center justify-center gap-2"
+                  style={{ background:th.tabActive, color:th.tabActiveTxt }}>
+                  💾 JSON 백업
+                </button>
+                <button onClick={onImport}
+                  className="flex-1 py-3 rounded-xl font-bold text-base transition-all active:scale-95 flex items-center justify-center gap-2 border"
+                  style={{ background:th.settingsInputBg, borderColor:th.cardBorder, color:th.textBody }}>
+                  📂 JSON 복원
+                </button>
               </div>
             </div>
             <div className="rounded-2xl p-6 border"
@@ -571,7 +624,10 @@ function CountdownBanner() {
 ══════════════════════════════════════════════ */
 export default function App() {
   const [records, setRecords] = useState<DayRecord[]>(() => {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]'); } catch { return []; }
+    try {
+      const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]');
+      return dedupeRecords(validateRecords(raw));
+    } catch { return []; }
   });
   const [levels, setLevels] = useState<LevelConfig[]>(() => {
     try {
@@ -606,9 +662,10 @@ export default function App() {
 
   const th = effTheme === 'dark' ? DARK : LIGHT;
 
-  const [score, setScore]     = useState(3);
-  const [note, setNote]       = useState('');
-  const [saved, setSaved]     = useState(false);
+  const [score, setScore]       = useState(3);
+  const [note, setNote]         = useState('');
+  const [saved, setSaved]       = useState(false);
+  const [saveErr, setSaveErr]   = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
   const today    = getTodayString();
@@ -621,10 +678,13 @@ export default function App() {
     : Math.min(100, Math.round(((total - level.min) / (level.max - level.min + 1)) * 100));
   const grad     = (effTheme === 'dark' ? GRAD_DARK : GRAD_LIGHT)[lvIdx] ?? GRAD_LIGHT[0];
 
-  useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); }, [records]);
-  useEffect(() => { localStorage.setItem(LEVELS_KEY,  JSON.stringify(levels));  }, [levels]);
   useEffect(() => {
-    localStorage.setItem(THEME_KEY, themeId);
+    const ok = lsSet(STORAGE_KEY, JSON.stringify(records));
+    setSaveErr(!ok);
+  }, [records]);
+  useEffect(() => { lsSet(LEVELS_KEY, JSON.stringify(levels)); }, [levels]);
+  useEffect(() => {
+    lsSet(THEME_KEY, themeId);
     document.body.style.background = th.bodyBg;
   }, [themeId, effTheme, th.bodyBg]);
 
@@ -639,11 +699,38 @@ export default function App() {
   const handleSetTheme   = (t: ThemeId)   => setThemeId(t);
   const handleExport = () => {
     const blob = new Blob(
-      [JSON.stringify({ exportedAt:new Date().toISOString(), records }, null, 2)],
-      { type:'application/json' }
+      [JSON.stringify({ exportedAt: new Date().toISOString(), records }, null, 2)],
+      { type: 'application/json' }
     );
-    const url = URL.createObjectURL(blob); const a = document.createElement('a');
-    a.href = url; a.download = `univer-records-${today}.json`; a.click(); URL.revokeObjectURL(url);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `univer-records-${today}.json`;
+    a.click(); URL.revokeObjectURL(url);
+  };
+
+  const handleImport = () => {
+    const input = document.createElement('input');
+    input.type = 'file'; input.accept = '.json,application/json';
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target?.result as string);
+          /* 직접 배열이거나 {records:[...]} 형태 모두 지원 */
+          const rawArr = Array.isArray(parsed) ? parsed : (parsed.records ?? []);
+          const imported = validateRecords(rawArr);
+          if (imported.length === 0) { alert('유효한 기록을 찾을 수 없습니다.'); return; }
+          const merged = dedupeRecords([...records, ...imported]);
+          if (confirm(`${imported.length}개의 기록을 가져옵니다.\n기존 기록과 병합됩니다. 계속할까요?`)) {
+            setRecords(merged);
+          }
+        } catch { alert('파일을 읽는 중 오류가 발생했습니다. JSON 형식을 확인해주세요.'); }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
   };
 
   const last7  = Array.from({ length:7 }, (_, i) => {
@@ -676,6 +763,7 @@ export default function App() {
             themeId={themeId}
             onSave={handleSaveLevels} onAddRecord={handleAddRecord}
             onThemeChange={handleSetTheme}
+            onExport={handleExport} onImport={handleImport}
             onClose={() => setShowSettings(false)} />
         )}
 
@@ -711,6 +799,15 @@ export default function App() {
               </button>
             </div>
           </div>
+
+          {/* ── 저장 오류 경고 (기기 저장 용량 부족 시) */}
+          {saveErr && (
+            <div className="w-full rounded-2xl mb-4 px-5 py-3 flex items-center gap-3 text-sm font-semibold"
+              style={{ background:'#fef2f2', border:'1px solid #fca5a5', color:'#991b1b' }}>
+              <span className="text-xl">⚠️</span>
+              <span>기기 저장 공간이 부족해 기록이 저장되지 않았습니다. JSON 백업 후 불필요한 파일을 정리해주세요.</span>
+            </div>
+          )}
 
           {/* ── 카운트다운 */}
           <CountdownBanner />
@@ -850,9 +947,11 @@ export default function App() {
                     <p className="text-sm" style={{ color:th.textSub }}>최근 7일</p>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <button onClick={handleExport}
+                <div className="flex gap-1.5">
+                  <button onClick={handleExport} title="JSON으로 백업"
                     className="text-sm px-3 py-2 rounded-xl font-semibold" style={{ color:'#3b82f6' }}>💾</button>
+                  <button onClick={handleImport} title="JSON에서 복원"
+                    className="text-sm px-3 py-2 rounded-xl font-semibold" style={{ color:'#10b981' }}>📂</button>
                   <button onClick={handleReset}
                     className="text-sm px-3 py-2 rounded-xl" style={{ color:'#f87171' }}>초기화</button>
                 </div>
