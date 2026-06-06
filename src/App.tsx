@@ -123,21 +123,29 @@ const ThemeCtx = createContext<Tokens>(LIGHT);
 const useTheme = () => useContext(ThemeCtx);
 
 /* ══════════════════════════════════════════════
-   레벨 카드 그라데이션  — 테마별로 완전 분리
+   레벨 카드 그라데이션  — 테마별, 9단계
 ══════════════════════════════════════════════ */
 const GRAD_LIGHT = [
-  { from: '#dde3ea', to: '#9aa5b4', text: '#1e293b', accent: '#475569' },  // Lv1 slate
-  { from: '#b2f5e3', to: '#34d399', text: '#064e3b', accent: '#065f46' },  // Lv2 emerald
-  { from: '#c0d9ff', to: '#5badff', text: '#1e3a8a', accent: '#1d4ed8' },  // Lv3 blue
-  { from: '#fde8a0', to: '#fbc244', text: '#78350f', accent: '#92400e' },  // Lv4 amber
-  { from: '#fecaca', to: '#f87171', text: '#7f1d1d', accent: '#991b1b' },  // Lv5 crimson
+  { from: '#dde3ea', to: '#94a3b8', text: '#1e293b' },  // Lv1 slate    충남대
+  { from: '#99f6e4', to: '#2dd4bf', text: '#134e4a' },  // Lv2 teal     인하대
+  { from: '#bae6fd', to: '#38bdf8', text: '#0c4a6e' },  // Lv3 sky      서울과기대
+  { from: '#c7d2fe', to: '#818cf8', text: '#1e1b4b' },  // Lv4 indigo   단국대
+  { from: '#ddd6fe', to: '#a78bfa', text: '#2e1065' },  // Lv5 violet   세종대
+  { from: '#fed7aa', to: '#fb923c', text: '#7c2d12' },  // Lv6 orange   동국대
+  { from: '#bbf7d0', to: '#4ade80', text: '#14532d' },  // Lv7 green    경희대
+  { from: '#fde68a', to: '#fbbf24', text: '#78350f' },  // Lv8 amber    성균관대
+  { from: '#fecaca', to: '#f87171', text: '#7f1d1d' },  // Lv9 crimson  고려대
 ];
 const GRAD_DARK = [
-  { from: '#1c2d40', to: '#2d4257', text: '#cbd5e1', accent: '#94a3b8' },  // Lv1 dark slate
-  { from: '#0a3d28', to: '#0f5c3d', text: '#a7f3d0', accent: '#6ee7b7' },  // Lv2 dark emerald
-  { from: '#0d1f60', to: '#1a3499', text: '#bfdbfe', accent: '#93c5fd' },  // Lv3 dark blue
-  { from: '#4a2700', to: '#6b3800', text: '#fde68a', accent: '#fbbf24' },  // Lv4 dark amber
-  { from: '#4a0a0a', to: '#7f1d1d', text: '#fecaca', accent: '#f87171' },  // Lv5 dark crimson
+  { from: '#1c2d3e', to: '#2d4257', text: '#cbd5e1' },  // Lv1 dark slate
+  { from: '#0a3530', to: '#0f5249', text: '#99f6e4' },  // Lv2 dark teal
+  { from: '#0a2540', to: '#0d3d66', text: '#bae6fd' },  // Lv3 dark sky
+  { from: '#16185a', to: '#252880', text: '#c7d2fe' },  // Lv4 dark indigo
+  { from: '#1f0d4a', to: '#33136e', text: '#ddd6fe' },  // Lv5 dark violet
+  { from: '#4a1800', to: '#7c2d12', text: '#fed7aa' },  // Lv6 dark orange
+  { from: '#052e16', to: '#14532d', text: '#bbf7d0' },  // Lv7 dark green
+  { from: '#4a2700', to: '#78350f', text: '#fde68a' },  // Lv8 dark amber
+  { from: '#4a0a0a', to: '#7f1d1d', text: '#fecaca' },  // Lv9 dark crimson
 ];
 
 /* ══════════════════════════════════════════════
@@ -152,26 +160,38 @@ type DayRecord = { date: string; score: number; note: string; };
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const DEFAULT_LEVELS: LevelConfig[] = [
-  { name: '레벨 1', subtitle: '지방 국립대 · 식품공학과',
-    schools: ['충남대 식품공학과', '강원대 식품생명공학과'],
-    min: 0,  max: 19,  color: '#64748b', emoji: '🌱', logo: `${BASE}/logos/level1.png` },
-  { name: '레벨 2', subtitle: '수도권 대학 · 식품공학과',
-    schools: ['인하대 식품영양학과', '단국대 식품영양학과'],
-    min: 20, max: 39,  color: '#059669', emoji: '🌿', logo: `${BASE}/logos/level2.png` },
-  { name: '레벨 3', subtitle: '인서울 · 식품공학과',
-    schools: ['경희대 식품생명공학과', '중앙대 식품공학전공', '동국대 식품생명공학과', '세종대 식품생명공학과'],
-    min: 40, max: 59,  color: '#2563eb', emoji: '🌳', logo: `${BASE}/logos/level3.png` },
-  { name: '레벨 4', subtitle: '인서울 상위 · 식품공학과',
-    schools: ['한양대(서울) 식품영양학과', '성균관대 식품생명공학과'],
-    min: 60, max: 79,  color: '#b45309', emoji: '🔥', logo: `${BASE}/logos/level4.png` },
-  { name: '레벨 5', subtitle: '최종 목표',
+  { name: '레벨 1', subtitle: '출발! 첫 번째 목표',
+    schools: ['충남대 식품공학과'],
+    min: 0,  max: 10,  color: '#64748b', emoji: '🌱', logo: `${BASE}/logos/level1.png` },
+  { name: '레벨 2', subtitle: '한 단계 업!',
+    schools: ['인하대 식품영양학과'],
+    min: 11, max: 21,  color: '#0d9488', emoji: '🌿', logo: `${BASE}/logos/level2.png` },
+  { name: '레벨 3', subtitle: '성장 중',
+    schools: ['서울과기대 식품공학과'],
+    min: 22, max: 32,  color: '#0284c7', emoji: '🚀', logo: `${BASE}/logos/level3.png` },
+  { name: '레벨 4', subtitle: '절반을 향해',
+    schools: ['단국대 식품공학과'],
+    min: 33, max: 43,  color: '#4338ca', emoji: '⚡', logo: `${BASE}/logos/level4.png` },
+  { name: '레벨 5', subtitle: '중간 지점 돌파',
+    schools: ['세종대 식품생명공학과'],
+    min: 44, max: 54,  color: '#7c3aed', emoji: '🌟', logo: `${BASE}/logos/level5.png` },
+  { name: '레벨 6', subtitle: '상위권 진입',
+    schools: ['동국대 식품생명공학과'],
+    min: 55, max: 65,  color: '#ea580c', emoji: '🔥', logo: `${BASE}/logos/level6.png` },
+  { name: '레벨 7', subtitle: '인서울 명문',
+    schools: ['경희대 식품생명공학과'],
+    min: 66, max: 76,  color: '#16a34a', emoji: '🏅', logo: `${BASE}/logos/level7.png` },
+  { name: '레벨 8', subtitle: '최상위권',
+    schools: ['성균관대 식품생명공학과'],
+    min: 77, max: 87,  color: '#b45309', emoji: '💎', logo: `${BASE}/logos/level8.png` },
+  { name: '레벨 9', subtitle: '최종 목표',
     schools: ['고려대 식품공학과'],
-    min: 80, max: 100, color: '#9b1b1b', emoji: '🏆', logo: `${BASE}/logos/level5.png` },
+    min: 88, max: 100, color: '#9b1b1b', emoji: '🏆', logo: `${BASE}/logos/level9.png` },
 ];
 
 const STORAGE_KEY = 'univer_records';
 const LEVELS_KEY  = 'univer_levels';
-const LEVELS_VER  = 'v5-2506';
+const LEVELS_VER  = 'v9-2506';  // 9레벨 구조로 업데이트
 const THEME_KEY   = 'univer_theme';
 
 const STAR_LABELS: Record<number, string> = {
