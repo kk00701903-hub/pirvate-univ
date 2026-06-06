@@ -21,31 +21,34 @@ type DayRecord = {
 };
 
 /* ───────────────────────────────────────────────
-   기본 레벨 데이터 (식품공학과 기준)
+   기본 레벨 데이터 (식품공학과 기준 · 5단계)
 ─────────────────────────────────────────────── */
 const DEFAULT_LEVELS: LevelConfig[] = [
-  { name: '지방 국립대 (하위)', subtitle: '식품공학과',
-    schools: ['충남대 식품공학과', '강원대 식품생명공학과', '공주대 식품공학과', '한경국립대 식품생명공학과'],
+  { name: '레벨 1',
+    subtitle: '지방 국립대 · 식품공학과',
+    schools: ['충남대 식품공학과', '강원대 식품생명공학과'],
     min: 0, max: 19, color: '#6b7280', emoji: '🌱', logo: '/logos/level1.png' },
-  { name: '지방 국립대 (상위)', subtitle: '식품공학과',
-    schools: ['인하대 식품영양학과', '충북대 식품생명공학과', '경상대 식품공학과', '동아대 식품생명공학과'],
+  { name: '레벨 2',
+    subtitle: '수도권 대학 · 식품공학과',
+    schools: ['인하대 식품영양학과', '단국대 식품영양학과'],
     min: 20, max: 39, color: '#10b981', emoji: '🌿', logo: '/logos/level2.png' },
-  { name: '인서울 하위', subtitle: '식품생명공학과',
-    schools: ['서울과기대 식품생명공학과', '건국대 식품과학부', '동국대 식품생명공학과', '광운대 식품생명공학과'],
+  { name: '레벨 3',
+    subtitle: '인서울 · 식품공학과',
+    schools: ['경희대 식품생명공학과', '중앙대 식품공학전공', '동국대 식품생명공학과', '세종대 식품생명공학과'],
     min: 40, max: 59, color: '#3b82f6', emoji: '🌳', logo: '/logos/level3.png' },
-  { name: '인서울 중위', subtitle: '식품공학·영양학과',
-    schools: ['경희대 식품생명공학과', '중앙대 식품공학전공', '세종대 식품생명공학과', '단국대 식품영양학과'],
-    min: 60, max: 79, color: '#8b5cf6', emoji: '⭐', logo: '/logos/level4.png' },
-  { name: '인서울 상위', subtitle: '식품영양학과',
+  { name: '레벨 4',
+    subtitle: '인서울 상위 · 식품공학과',
     schools: ['한양대(서울) 식품영양학과', '성균관대 식품생명공학과'],
-    min: 80, max: 94, color: '#f59e0b', emoji: '🔥', logo: '/logos/level5.png' },
-  { name: '고려대학교', subtitle: '식품공학과 (최종 목표)',
+    min: 60, max: 79, color: '#f59e0b', emoji: '🔥', logo: '/logos/level4.png' },
+  { name: '레벨 5',
+    subtitle: '최종 목표',
     schools: ['고려대 식품공학과'],
-    min: 95, max: 100, color: '#004b8d', emoji: '🏆', logo: '/logos/level6.png' },
+    min: 80, max: 100, color: '#004b8d', emoji: '🏆', logo: '/logos/level5.png' },
 ];
 
 const STORAGE_KEY = 'univer_records';
-const LEVELS_KEY = 'univer_levels';
+const LEVELS_KEY  = 'univer_levels';
+const LEVELS_VER  = 'v5-2506';   // 버전 바뀌면 레벨 설정 자동 초기화
 
 const STAR_LABELS: Record<number, string> = {
   1: '😞 매우 나쁨',
@@ -423,6 +426,13 @@ export default function App() {
 
   const [levels, setLevels] = useState<LevelConfig[]>(() => {
     try {
+      /* 버전이 다르면 기본값으로 강제 초기화 */
+      const ver = localStorage.getItem(LEVELS_KEY + '_ver');
+      if (ver !== LEVELS_VER) {
+        localStorage.removeItem(LEVELS_KEY);
+        localStorage.setItem(LEVELS_KEY + '_ver', LEVELS_VER);
+        return DEFAULT_LEVELS;
+      }
       const saved = localStorage.getItem(LEVELS_KEY);
       return saved ? JSON.parse(saved) : DEFAULT_LEVELS;
     } catch { return DEFAULT_LEVELS; }
