@@ -71,12 +71,12 @@ function getLevel(totalScore: number, levels: LevelConfig[]) {
 ─────────────────────────────────────────────── */
 function LogoOrEmoji({ logo, emoji }: { logo: string; emoji: string }) {
   const [failed, setFailed] = useState(false);
-  if (failed) return <span className="text-5xl">{emoji}</span>;
+  if (failed) return <span className="text-6xl">{emoji}</span>;
   return (
     <img
       src={logo}
       alt={emoji}
-      className="w-16 h-16 object-contain rounded-xl bg-white/20 p-1.5"
+      className="w-24 h-24 object-contain rounded-2xl bg-white/20 p-2"
       onError={() => setFailed(true)}
     />
   );
@@ -525,20 +525,25 @@ export default function App() {
           className="w-full rounded-3xl p-8 mb-6 text-white shadow-xl"
           style={{ background: level.color }}
         >
-          <div className="flex items-center gap-5 mb-4">
-            <LogoOrEmoji logo={level.logo} emoji={level.emoji} />
-            <div>
-              <p className="text-white/70 text-sm">현재 레벨</p>
-              <p className="text-3xl font-bold leading-tight">{level.name}</p>
-              <p className="text-white/80 text-sm mt-1">{level.subtitle}</p>
+          {/* 텍스트(왼쪽) + 로고(오른쪽) */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex-1">
+              <p className="text-white/70 text-sm font-medium mb-1">
+                레벨 {levels.indexOf(level) + 1} / {levels.length}
+              </p>
+              <p className="text-4xl font-black leading-tight">{level.name}</p>
+              <p className="text-white/80 text-base mt-1">{level.subtitle}</p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {level.schools.map((s) => (
+                  <span key={s} className="text-sm bg-white/20 rounded-full px-3 py-1">{s}</span>
+                ))}
+              </div>
+            </div>
+            <div className="ml-6 shrink-0">
+              <LogoOrEmoji logo={level.logo} emoji={level.emoji} />
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 mb-5">
-            {level.schools.map((s) => (
-              <span key={s} className="text-sm bg-white/20 rounded-full px-3 py-1">{s}</span>
-            ))}
-          </div>
-          <div className="bg-white/20 rounded-full h-4 overflow-hidden">
+          <div className="bg-white/20 rounded-full h-4 overflow-hidden mt-2">
             <div
               className="h-full rounded-full bg-white transition-all duration-700"
               style={{ width: `${progressPct}%` }}
