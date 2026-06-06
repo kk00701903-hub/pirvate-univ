@@ -4,14 +4,14 @@ function LogoOrEmoji({ logo, emoji }: { logo: string; emoji: string }) {
   const [failed, setFailed] = useState(false);
 
   if (failed) {
-    return <span className="text-4xl">{emoji}</span>;
+    return <span className="text-5xl">{emoji}</span>;
   }
 
   return (
     <img
       src={logo}
       alt={emoji}
-      className="w-12 h-12 object-contain rounded-lg bg-white/20 p-1"
+      className="w-16 h-16 object-contain rounded-xl bg-white/20 p-1.5"
       onError={() => setFailed(true)}
     />
   );
@@ -128,130 +128,145 @@ export default function App() {
   const progressPct = Math.min(100, (totalScore / 100) * 100);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex flex-col items-center px-4 py-10">
-      {/* Header */}
-      <div className="w-full max-w-md text-center mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-1">대학 레벨업</h1>
-        <p className="text-slate-500 text-sm">매일 만족도를 기록하고 고려대까지 레벨업!</p>
-      </div>
+    /* iPad 10: 820px 논리폭 기준 — max-w-[820px] + 2열 그리드 */
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex flex-col items-center px-6 py-10">
+      <div className="w-full max-w-[820px]">
 
-      {/* Level Card */}
-      <div
-        className="w-full max-w-md rounded-2xl p-6 mb-6 text-white shadow-lg"
-        style={{ background: level.color }}
-      >
-        <div className="flex items-center gap-3 mb-3">
-          <LogoOrEmoji logo={level.logo} emoji={level.emoji} />
-          <div>
-            <p className="text-white/70 text-xs">현재 레벨</p>
-            <p className="text-2xl font-bold leading-tight">{level.name}</p>
-            <p className="text-white/80 text-xs mt-0.5">{level.subtitle}</p>
-          </div>
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-slate-800 mb-2">대학 레벨업</h1>
+          <p className="text-slate-500 text-base">매일 만족도를 기록하고 고려대까지 레벨업! 🎯</p>
         </div>
-        <div className="flex flex-wrap gap-1 mb-3">
-          {level.schools.map((s) => (
-            <span key={s} className="text-xs bg-white/20 rounded-full px-2 py-0.5">
-              {s}
-            </span>
-          ))}
-        </div>
-        <div className="bg-white/20 rounded-full h-3 overflow-hidden">
-          <div
-            className="h-full rounded-full bg-white transition-all duration-700"
-            style={{ width: `${progressPct}%` }}
-          />
-        </div>
-        <p className="text-right text-white/80 text-sm mt-1">
-          {totalScore} / 100 점
-        </p>
-      </div>
 
-      {/* Today Input */}
-      <div className="w-full max-w-md bg-white rounded-2xl p-6 mb-6 shadow-sm border border-slate-100">
-        <h2 className="font-semibold text-slate-700 mb-4">
-          오늘의 만족도 기록{' '}
-          <span className="text-slate-400 font-normal text-sm">({today})</span>
-        </h2>
-
-        {todayRecord ? (
-          <p className="text-green-600 font-medium text-center py-4">
-            ✅ 오늘 기록 완료! ({todayRecord.score}점)
-          </p>
-        ) : (
-          <>
-            <div className="mb-4">
-              <label className="block text-sm text-slate-600 mb-2">
-                만족도: <strong>{score}점</strong>
-              </label>
-              <input
-                type="range"
-                min={1}
-                max={10}
-                value={score}
-                onChange={(e) => setScore(Number(e.target.value))}
-                className="w-full accent-blue-600"
-              />
-              <div className="flex justify-between text-xs text-slate-400 mt-1">
-                <span>1점 (매우 나쁨)</span>
-                <span>10점 (최고)</span>
-              </div>
+        {/* Level Card — full width */}
+        <div
+          className="w-full rounded-3xl p-8 mb-6 text-white shadow-xl"
+          style={{ background: level.color }}
+        >
+          <div className="flex items-center gap-5 mb-4">
+            <LogoOrEmoji logo={level.logo} emoji={level.emoji} />
+            <div>
+              <p className="text-white/70 text-sm">현재 레벨</p>
+              <p className="text-3xl font-bold leading-tight">{level.name}</p>
+              <p className="text-white/80 text-sm mt-1">{level.subtitle}</p>
             </div>
-            <textarea
-              className="w-full border border-slate-200 rounded-lg p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-              rows={3}
-              placeholder="오늘 하루 한 마디 (선택)"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-            />
-            <button
-              onClick={handleSave}
-              className="mt-4 w-full py-3 rounded-xl font-semibold text-white transition-opacity"
-              style={{ background: '#004b8d' }}
-            >
-              {saved ? '저장됨 ✓' : '오늘 기록 저장'}
-            </button>
-          </>
-        )}
-      </div>
-
-      {/* History */}
-      <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="font-semibold text-slate-700">기록 히스토리</h2>
-          <button
-            onClick={handleReset}
-            className="text-xs text-red-400 hover:text-red-600"
-          >
-            초기화
-          </button>
-        </div>
-        {records.length === 0 ? (
-          <p className="text-slate-400 text-sm text-center py-6">
-            아직 기록이 없습니다. 오늘부터 시작해보세요!
-          </p>
-        ) : (
-          <ul className="space-y-2 max-h-64 overflow-y-auto">
-            {[...records].reverse().map((r) => (
-              <li
-                key={r.date}
-                className="flex items-start gap-3 py-2 border-b border-slate-50 last:border-0"
-              >
-                <span className="text-xs text-slate-400 mt-0.5 shrink-0">
-                  {r.date}
-                </span>
-                <span className="font-bold text-blue-700 shrink-0">
-                  {r.score}점
-                </span>
-                {r.note && (
-                  <span className="text-sm text-slate-600 truncate">{r.note}</span>
-                )}
-              </li>
+          </div>
+          <div className="flex flex-wrap gap-2 mb-5">
+            {level.schools.map((s) => (
+              <span key={s} className="text-sm bg-white/20 rounded-full px-3 py-1">
+                {s}
+              </span>
             ))}
-          </ul>
-        )}
-      </div>
+          </div>
+          <div className="bg-white/20 rounded-full h-4 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-white transition-all duration-700"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+          <p className="text-right text-white/80 text-base mt-2 font-semibold">
+            {totalScore} / 100 점
+          </p>
+        </div>
 
-      <p className="text-xs text-slate-400 mt-8">데이터는 기기에만 저장됩니다.</p>
+        {/* 2열 그리드: 입력 | 히스토리 */}
+        <div className="grid grid-cols-2 gap-6">
+
+          {/* 오늘 입력 */}
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+            <h2 className="font-bold text-slate-700 text-xl mb-5">
+              오늘의 만족도
+              <span className="text-slate-400 font-normal text-sm ml-2">({today})</span>
+            </h2>
+
+            {todayRecord ? (
+              <div className="flex flex-col items-center justify-center py-10 gap-3">
+                <span className="text-5xl">✅</span>
+                <p className="text-green-600 font-semibold text-lg">오늘 기록 완료!</p>
+                <p className="text-slate-500 text-base">{todayRecord.score}점 기록됨</p>
+                {todayRecord.note && (
+                  <p className="text-slate-400 text-sm text-center mt-1">"{todayRecord.note}"</p>
+                )}
+              </div>
+            ) : (
+              <>
+                <div className="mb-6">
+                  <label className="block text-base text-slate-600 mb-3">
+                    만족도: <strong className="text-2xl text-blue-600">{score}점</strong>
+                  </label>
+                  <input
+                    type="range"
+                    min={1}
+                    max={10}
+                    value={score}
+                    onChange={(e) => setScore(Number(e.target.value))}
+                    className="w-full h-3 accent-blue-600 cursor-pointer"
+                  />
+                  <div className="flex justify-between text-sm text-slate-400 mt-2">
+                    <span>1점 (매우 나쁨)</span>
+                    <span>10점 (최고)</span>
+                  </div>
+                </div>
+                <textarea
+                  className="w-full border border-slate-200 rounded-xl p-4 text-base resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  rows={4}
+                  placeholder="오늘 하루 한 마디 (선택)"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                />
+                <button
+                  onClick={handleSave}
+                  className="mt-5 w-full py-4 rounded-2xl font-bold text-white text-lg transition-opacity active:opacity-80"
+                  style={{ background: '#004b8d' }}
+                >
+                  {saved ? '저장됨 ✓' : '오늘 기록 저장'}
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* 히스토리 */}
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+            <div className="flex justify-between items-center mb-5">
+              <h2 className="font-bold text-slate-700 text-xl">기록 히스토리</h2>
+              <button
+                onClick={handleReset}
+                className="text-sm text-red-400 hover:text-red-600 py-1 px-3 rounded-lg hover:bg-red-50"
+              >
+                초기화
+              </button>
+            </div>
+            {records.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 gap-3 text-slate-400">
+                <span className="text-4xl">📝</span>
+                <p className="text-base text-center">아직 기록이 없습니다.<br/>오늘부터 시작해보세요!</p>
+              </div>
+            ) : (
+              <ul className="space-y-3 max-h-96 overflow-y-auto pr-1">
+                {[...records].reverse().map((r) => (
+                  <li
+                    key={r.date}
+                    className="flex items-start gap-4 py-3 border-b border-slate-50 last:border-0"
+                  >
+                    <span className="text-sm text-slate-400 mt-0.5 shrink-0 w-24">
+                      {r.date}
+                    </span>
+                    <span className="font-bold text-blue-700 text-base shrink-0">
+                      {r.score}점
+                    </span>
+                    {r.note && (
+                      <span className="text-sm text-slate-600 leading-relaxed">{r.note}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+        </div>
+
+        <p className="text-sm text-slate-400 mt-8 text-center">데이터는 기기에만 저장됩니다.</p>
+      </div>
     </div>
   );
 }
