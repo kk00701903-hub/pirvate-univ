@@ -1,12 +1,77 @@
 import { useState, useEffect } from 'react';
 
+/* ───────────────────────────────────────────────
+   타입
+─────────────────────────────────────────────── */
+type LevelConfig = {
+  name: string;
+  subtitle: string;
+  schools: string[];
+  min: number;
+  max: number;
+  color: string;
+  emoji: string;
+  logo: string;
+};
+
+type DayRecord = {
+  date: string;
+  score: number; // 1~5
+  note: string;
+};
+
+/* ───────────────────────────────────────────────
+   기본 레벨 데이터 (식품공학과 기준)
+─────────────────────────────────────────────── */
+const DEFAULT_LEVELS: LevelConfig[] = [
+  { name: '지방 국립대 (하위)', subtitle: '식품공학과 · 시작점',
+    schools: ['충남대', '전남대', '경상국립대', '강원대', '제주대'],
+    min: 0, max: 19, color: '#6b7280', emoji: '🌱', logo: '/logos/level1.svg' },
+  { name: '지방 국립대 (상위)', subtitle: '식품공학과',
+    schools: ['부산대', '경북대', '전북대', '인하대', '충북대'],
+    min: 20, max: 39, color: '#10b981', emoji: '🌿', logo: '/logos/level2.svg' },
+  { name: '인서울 하위', subtitle: '식품공학·생명공학과',
+    schools: ['서울과기대', '건국대', '동국대', '서울여대', '숙명여대'],
+    min: 40, max: 59, color: '#3b82f6', emoji: '🌳', logo: '/logos/level3.svg' },
+  { name: '인서울 중위', subtitle: '식품공학·영양학과',
+    schools: ['경희대', '중앙대', '이화여대', '한양대(에리카)'],
+    min: 60, max: 79, color: '#8b5cf6', emoji: '⭐', logo: '/logos/level4.svg' },
+  { name: '인서울 상위', subtitle: '식품공학·영양학과',
+    schools: ['한양대(서울)', '연세대', '서울대'],
+    min: 80, max: 94, color: '#f59e0b', emoji: '🔥', logo: '/logos/level5.svg' },
+  { name: '고려대학교', subtitle: '식품공학과 (최종 목표)',
+    schools: ['고려대학교 식품공학과'],
+    min: 95, max: 100, color: '#004b8d', emoji: '🏆', logo: '/logos/level6.svg' },
+];
+
+const STORAGE_KEY = 'univer_records';
+const LEVELS_KEY = 'univer_levels';
+
+const STAR_LABELS: Record<number, string> = {
+  1: '😞 매우 나쁨',
+  2: '😕 나쁨',
+  3: '😐 보통',
+  4: '🙂 좋음',
+  5: '😄 최고!',
+};
+
+/* ───────────────────────────────────────────────
+   헬퍼
+─────────────────────────────────────────────── */
+function getTodayString() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getLevel(totalScore: number, levels: LevelConfig[]) {
+  return levels.find((l) => totalScore >= l.min && totalScore <= l.max) ?? levels[0];
+}
+
+/* ───────────────────────────────────────────────
+   로고/이모지 컴포넌트
+─────────────────────────────────────────────── */
 function LogoOrEmoji({ logo, emoji }: { logo: string; emoji: string }) {
   const [failed, setFailed] = useState(false);
-
-  if (failed) {
-    return <span className="text-5xl">{emoji}</span>;
-  }
-
+  if (failed) return <span className="text-5xl">{emoji}</span>;
   return (
     <img
       src={logo}
@@ -17,128 +82,232 @@ function LogoOrEmoji({ logo, emoji }: { logo: string; emoji: string }) {
   );
 }
 
-/**
- * 식품공학과/식품영양학과/식품생명공학과 기준 레벨
- * 2024~2026 정시·수시 입결 데이터 반영 (최저 기준: 충남대)
- */
-const UNIVERSITY_LEVELS = [
-  {
-    name: '지방 국립대 (하위)',
-    subtitle: '식품공학과 · 시작점',
-    schools: ['충남대', '전남대', '경상국립대', '강원대', '제주대'],
-    min: 0, max: 19,
-    color: '#6b7280', emoji: '🌱', logo: '/logos/level1.svg',
-  },
-  {
-    name: '지방 국립대 (상위)',
-    subtitle: '식품공학과',
-    schools: ['부산대', '경북대', '전북대', '인하대', '충북대'],
-    min: 20, max: 39,
-    color: '#10b981', emoji: '🌿', logo: '/logos/level2.svg',
-  },
-  {
-    name: '인서울 하위',
-    subtitle: '식품공학·생명공학과',
-    schools: ['서울과기대', '건국대', '동국대', '서울여대', '숙명여대'],
-    min: 40, max: 59,
-    color: '#3b82f6', emoji: '🌳', logo: '/logos/level3.svg',
-  },
-  {
-    name: '인서울 중위',
-    subtitle: '식품공학·영양학과',
-    schools: ['경희대', '중앙대', '이화여대', '한양대(에리카)'],
-    min: 60, max: 79,
-    color: '#8b5cf6', emoji: '⭐', logo: '/logos/level4.svg',
-  },
-  {
-    name: '인서울 상위',
-    subtitle: '식품공학·영양학과',
-    schools: ['한양대(서울)', '연세대', '서울대'],
-    min: 80, max: 94,
-    color: '#f59e0b', emoji: '🔥', logo: '/logos/level5.svg',
-  },
-  {
-    name: '고려대학교',
-    subtitle: '식품공학과 (최종 목표)',
-    schools: ['고려대학교 식품공학과'],
-    min: 95, max: 100,
-    color: '#004b8d', emoji: '🏆', logo: '/logos/level6.svg',
-  },
-];
-
-const STORAGE_KEY = 'univer_records';
-
-type DayRecord = {
-  date: string;
-  score: number;
-  note: string;
-};
-
-function getLevel(totalScore: number) {
+/* ───────────────────────────────────────────────
+   별점 선택 컴포넌트
+─────────────────────────────────────────────── */
+function StarPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  const [hovered, setHovered] = useState(0);
+  const display = hovered || value;
   return (
-    UNIVERSITY_LEVELS.find(
-      (l) => totalScore >= l.min && totalScore <= l.max,
-    ) ?? UNIVERSITY_LEVELS[0]
+    <div>
+      <div className="flex gap-3 justify-center my-4">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button
+            key={n}
+            onClick={() => onChange(n)}
+            onMouseEnter={() => setHovered(n)}
+            onMouseLeave={() => setHovered(0)}
+            className="text-5xl transition-transform active:scale-90 hover:scale-110"
+            style={{ filter: n <= display ? 'none' : 'grayscale(1) opacity(0.3)' }}
+          >
+            ⭐
+          </button>
+        ))}
+      </div>
+      <p className="text-center text-base font-semibold text-slate-600 h-6">
+        {STAR_LABELS[display] ?? ''}
+      </p>
+    </div>
   );
 }
 
-function getTodayString() {
-  return new Date().toISOString().slice(0, 10);
+/* ───────────────────────────────────────────────
+   설정 패널 컴포넌트
+─────────────────────────────────────────────── */
+function SettingsPanel({
+  levels,
+  onSave,
+  onClose,
+}: {
+  levels: LevelConfig[];
+  onSave: (updated: LevelConfig[]) => void;
+  onClose: () => void;
+}) {
+  const [draft, setDraft] = useState<LevelConfig[]>(
+    levels.map((l) => ({ ...l, schools: [...l.schools] })),
+  );
+
+  const updateSchools = (idx: number, raw: string) => {
+    const schools = raw.split(',').map((s) => s.trim()).filter(Boolean);
+    setDraft((prev) => prev.map((l, i) => (i === idx ? { ...l, schools } : l)));
+  };
+
+  const updateField = (idx: number, field: 'name' | 'subtitle', val: string) => {
+    setDraft((prev) => prev.map((l, i) => (i === idx ? { ...l, [field]: val } : l)));
+  };
+
+  const handleReset = () => {
+    if (confirm('기본값으로 초기화할까요?')) setDraft(DEFAULT_LEVELS.map((l) => ({ ...l, schools: [...l.schools] })));
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-3xl w-full max-w-[780px] max-h-[88vh] flex flex-col shadow-2xl">
+        {/* 헤더 */}
+        <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100">
+          <h2 className="text-2xl font-bold text-slate-800">레벨 설정</h2>
+          <div className="flex gap-3">
+            <button
+              onClick={handleReset}
+              className="text-sm text-slate-500 hover:text-slate-700 px-4 py-2 rounded-xl hover:bg-slate-100"
+            >
+              기본값 복원
+            </button>
+            <button
+              onClick={() => onSave(draft)}
+              className="text-sm font-bold text-white px-5 py-2 rounded-xl"
+              style={{ background: '#004b8d' }}
+            >
+              저장
+            </button>
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-slate-600 text-2xl leading-none px-2"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+        {/* 레벨 목록 */}
+        <div className="overflow-y-auto px-8 py-6 space-y-5">
+          {draft.map((level, idx) => (
+            <div
+              key={idx}
+              className="rounded-2xl p-5 border-2"
+              style={{ borderColor: level.color + '55', background: level.color + '08' }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-2xl">{level.emoji}</span>
+                <div
+                  className="text-xs font-bold text-white px-3 py-1 rounded-full"
+                  style={{ background: level.color }}
+                >
+                  Lv.{idx + 1} · {level.min}~{level.max}점
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div>
+                  <label className="text-xs text-slate-500 mb-1 block">레벨 이름</label>
+                  <input
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    value={level.name}
+                    onChange={(e) => updateField(idx, 'name', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-500 mb-1 block">부제목</label>
+                  <input
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    value={level.subtitle}
+                    onChange={(e) => updateField(idx, 'subtitle', e.target.value)}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">
+                  대학 목록 <span className="text-slate-400">(쉼표로 구분)</span>
+                </label>
+                <input
+                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  value={level.schools.join(', ')}
+                  onChange={(e) => updateSchools(idx, e.target.value)}
+                  placeholder="예: 충남대, 전남대, 강원대"
+                />
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {level.schools.map((s) => (
+                    <span
+                      key={s}
+                      className="text-xs px-2 py-0.5 rounded-full text-white"
+                      style={{ background: level.color }}
+                    >
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
+/* ───────────────────────────────────────────────
+   메인 앱
+─────────────────────────────────────────────── */
 export default function App() {
   const [records, setRecords] = useState<DayRecord[]>(() => {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]');
-    } catch {
-      return [];
-    }
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]'); }
+    catch { return []; }
   });
-  const [score, setScore] = useState(5);
+
+  const [levels, setLevels] = useState<LevelConfig[]>(() => {
+    try {
+      const saved = localStorage.getItem(LEVELS_KEY);
+      return saved ? JSON.parse(saved) : DEFAULT_LEVELS;
+    } catch { return DEFAULT_LEVELS; }
+  });
+
+  const [score, setScore] = useState(3);
   const [note, setNote] = useState('');
   const [saved, setSaved] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const today = getTodayString();
   const todayRecord = records.find((r) => r.date === today);
-
-  const totalScore = Math.min(
-    100,
-    records.reduce((sum, r) => sum + r.score, 0),
-  );
-  const level = getLevel(totalScore);
+  const totalScore = Math.min(100, records.reduce((sum, r) => sum + r.score, 0));
+  const level = getLevel(totalScore, levels);
+  const progressPct = totalScore;
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
   }, [records]);
 
+  useEffect(() => {
+    localStorage.setItem(LEVELS_KEY, JSON.stringify(levels));
+  }, [levels]);
+
   const handleSave = () => {
     if (todayRecord) return;
-    const newRecord: DayRecord = { date: today, score, note };
-    setRecords((prev) => [...prev, newRecord]);
+    setRecords((prev) => [...prev, { date: today, score, note }]);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
 
   const handleReset = () => {
-    if (confirm('모든 기록을 초기화할까요?')) {
-      setRecords([]);
-    }
+    if (confirm('모든 기록을 초기화할까요?')) setRecords([]);
   };
 
-  const progressPct = Math.min(100, (totalScore / 100) * 100);
+  const handleSaveLevels = (updated: LevelConfig[]) => {
+    setLevels(updated);
+    setShowSettings(false);
+  };
 
   return (
-    /* iPad 10: 820px 논리폭 기준 — max-w-[820px] + 2열 그리드 */
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex flex-col items-center px-6 py-10">
+      {showSettings && (
+        <SettingsPanel levels={levels} onSave={handleSaveLevels} onClose={() => setShowSettings(false)} />
+      )}
+
       <div className="w-full max-w-[820px]">
 
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-slate-800 mb-2">대학 레벨업</h1>
-          <p className="text-slate-500 text-base">매일 만족도를 기록하고 고려대까지 레벨업! 🎯</p>
+        {/* 헤더 */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-slate-800 mb-1">대학 레벨업</h1>
+            <p className="text-slate-500 text-base">매일 만족도를 기록하고 고려대까지 레벨업! 🎯</p>
+          </div>
+          <button
+            onClick={() => setShowSettings(true)}
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-white border border-slate-200 text-slate-600 font-semibold text-base shadow-sm hover:bg-slate-50 active:scale-95 transition-transform"
+          >
+            ⚙️ 설정
+          </button>
         </div>
 
-        {/* Level Card — full width */}
+        {/* 레벨 카드 */}
         <div
           className="w-full rounded-3xl p-8 mb-6 text-white shadow-xl"
           style={{ background: level.color }}
@@ -153,9 +322,7 @@ export default function App() {
           </div>
           <div className="flex flex-wrap gap-2 mb-5">
             {level.schools.map((s) => (
-              <span key={s} className="text-sm bg-white/20 rounded-full px-3 py-1">
-                {s}
-              </span>
+              <span key={s} className="text-sm bg-white/20 rounded-full px-3 py-1">{s}</span>
             ))}
           </div>
           <div className="bg-white/20 rounded-full h-4 overflow-hidden">
@@ -169,46 +336,34 @@ export default function App() {
           </p>
         </div>
 
-        {/* 2열 그리드: 입력 | 히스토리 */}
+        {/* 2열 그리드 */}
         <div className="grid grid-cols-2 gap-6">
 
           {/* 오늘 입력 */}
           <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
-            <h2 className="font-bold text-slate-700 text-xl mb-5">
+            <h2 className="font-bold text-slate-700 text-xl mb-1">
               오늘의 만족도
-              <span className="text-slate-400 font-normal text-sm ml-2">({today})</span>
             </h2>
+            <p className="text-slate-400 text-sm mb-5">{today}</p>
 
             {todayRecord ? (
-              <div className="flex flex-col items-center justify-center py-10 gap-3">
-                <span className="text-5xl">✅</span>
+              <div className="flex flex-col items-center justify-center py-8 gap-3">
+                <span className="text-6xl">✅</span>
                 <p className="text-green-600 font-semibold text-lg">오늘 기록 완료!</p>
-                <p className="text-slate-500 text-base">{todayRecord.score}점 기록됨</p>
+                <div className="flex gap-1">
+                  {[1,2,3,4,5].map((n) => (
+                    <span key={n} style={{ filter: n <= todayRecord.score ? 'none' : 'grayscale(1) opacity(0.25)' }} className="text-2xl">⭐</span>
+                  ))}
+                </div>
                 {todayRecord.note && (
-                  <p className="text-slate-400 text-sm text-center mt-1">"{todayRecord.note}"</p>
+                  <p className="text-slate-400 text-sm text-center mt-1 italic">"{todayRecord.note}"</p>
                 )}
               </div>
             ) : (
               <>
-                <div className="mb-6">
-                  <label className="block text-base text-slate-600 mb-3">
-                    만족도: <strong className="text-2xl text-blue-600">{score}점</strong>
-                  </label>
-                  <input
-                    type="range"
-                    min={1}
-                    max={10}
-                    value={score}
-                    onChange={(e) => setScore(Number(e.target.value))}
-                    className="w-full h-3 accent-blue-600 cursor-pointer"
-                  />
-                  <div className="flex justify-between text-sm text-slate-400 mt-2">
-                    <span>1점 (매우 나쁨)</span>
-                    <span>10점 (최고)</span>
-                  </div>
-                </div>
+                <StarPicker value={score} onChange={setScore} />
                 <textarea
-                  className="w-full border border-slate-200 rounded-xl p-4 text-base resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-slate-200 rounded-xl p-4 text-base resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 mt-5"
                   rows={4}
                   placeholder="오늘 하루 한 마디 (선택)"
                   value={note}
@@ -216,7 +371,7 @@ export default function App() {
                 />
                 <button
                   onClick={handleSave}
-                  className="mt-5 w-full py-4 rounded-2xl font-bold text-white text-lg transition-opacity active:opacity-80"
+                  className="mt-5 w-full py-4 rounded-2xl font-bold text-white text-lg transition-all active:scale-95"
                   style={{ background: '#004b8d' }}
                 >
                   {saved ? '저장됨 ✓' : '오늘 기록 저장'}
@@ -239,24 +394,19 @@ export default function App() {
             {records.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 gap-3 text-slate-400">
                 <span className="text-4xl">📝</span>
-                <p className="text-base text-center">아직 기록이 없습니다.<br/>오늘부터 시작해보세요!</p>
+                <p className="text-base text-center">아직 기록이 없습니다.<br />오늘부터 시작해보세요!</p>
               </div>
             ) : (
               <ul className="space-y-3 max-h-96 overflow-y-auto pr-1">
                 {[...records].reverse().map((r) => (
-                  <li
-                    key={r.date}
-                    className="flex items-start gap-4 py-3 border-b border-slate-50 last:border-0"
-                  >
-                    <span className="text-sm text-slate-400 mt-0.5 shrink-0 w-24">
-                      {r.date}
-                    </span>
-                    <span className="font-bold text-blue-700 text-base shrink-0">
-                      {r.score}점
-                    </span>
-                    {r.note && (
-                      <span className="text-sm text-slate-600 leading-relaxed">{r.note}</span>
-                    )}
+                  <li key={r.date} className="flex items-center gap-4 py-3 border-b border-slate-50 last:border-0">
+                    <span className="text-sm text-slate-400 shrink-0 w-24">{r.date}</span>
+                    <div className="flex shrink-0">
+                      {[1,2,3,4,5].map((n) => (
+                        <span key={n} style={{ filter: n <= r.score ? 'none' : 'grayscale(1) opacity(0.2)' }} className="text-lg">⭐</span>
+                      ))}
+                    </div>
+                    {r.note && <span className="text-sm text-slate-600 truncate">{r.note}</span>}
                   </li>
                 ))}
               </ul>
