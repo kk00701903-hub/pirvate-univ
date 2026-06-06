@@ -77,31 +77,26 @@ function getLevel(totalScore: number, levels: LevelConfig[]) {
 function LevelLogoArea({ logo, levelIdx }: { logo: string; levelIdx: number }) {
   const [failed, setFailed] = useState(false);
 
+  /* 레벨 카드 높이 ~160px → 절반 = 약 80px → w-20 h-20 (80px) */
   if (!failed) {
     return (
-      <div className="relative w-28 h-28 shrink-0">
+      <div className="relative w-20 h-20 shrink-0">
         <img
           src={logo}
           alt={`레벨 ${levelIdx + 1} 로고`}
-          className="w-full h-full object-contain rounded-2xl bg-white/15 p-1.5 shadow-inner"
+          className="w-full h-full object-contain rounded-xl bg-white/15 shadow-inner"
           onError={() => setFailed(true)}
         />
-        <span className="absolute -bottom-1 -right-1 text-[10px] bg-white/30 text-white rounded-full px-1.5 py-0.5 font-bold">
-          Lv.{levelIdx + 1}
-        </span>
       </div>
     );
   }
 
   /* 로고 없을 때 — 점선 플레이스홀더 */
   return (
-    <div className="w-28 h-28 shrink-0 relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-white/40 bg-white/10 gap-1 cursor-default select-none">
-      <span className="text-3xl opacity-60">🖼️</span>
-      <span className="text-[10px] text-white/60 font-medium text-center leading-tight px-1">
+    <div className="w-20 h-20 shrink-0 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-white/40 bg-white/10 gap-0.5 cursor-default select-none">
+      <span className="text-2xl opacity-60">🖼️</span>
+      <span className="text-[9px] text-white/60 font-medium text-center leading-tight px-1">
         level{levelIdx + 1}.png
-      </span>
-      <span className="absolute -bottom-1 -right-1 text-[10px] bg-white/30 text-white rounded-full px-1.5 py-0.5 font-bold">
-        Lv.{levelIdx + 1}
       </span>
     </div>
   );
