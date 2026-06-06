@@ -343,6 +343,27 @@ export default function App() {
     setShowSettings(false);
   };
 
+  /* 기기에 JSON 파일로 저장 */
+  const handleExport = () => {
+    const data = { exportedAt: new Date().toISOString(), records };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `univer-records-${getTodayString()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  /* 최근 7일 날짜 배열 생성 */
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    return d.toISOString().slice(0, 10);
+  });
+
+  const DAY_KO = ['일', '월', '화', '수', '목', '금', '토'];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex flex-col items-center px-6 py-10">
       {showSettings && (
@@ -441,42 +462,100 @@ export default function App() {
             )}
           </div>
 
-          {/* 히스토리 */}
-          <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+          {/* 최근 7일 히스토리 */}
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 flex flex-col">
             <div className="flex justify-between items-center mb-5">
-              <h2 className="font-bold text-slate-700 text-xl">기록 히스토리</h2>
-              <button
-                onClick={handleReset}
-                className="text-sm text-red-400 hover:text-red-600 py-1 px-3 rounded-lg hover:bg-red-50"
-              >
-                초기화
-              </button>
-            </div>
-            {records.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 gap-3 text-slate-400">
-                <span className="text-4xl">📝</span>
-                <p className="text-base text-center">아직 기록이 없습니다.<br />오늘부터 시작해보세요!</p>
+              <div>
+                <h2 className="font-bold text-slate-700 text-xl">이번 주 기록</h2>
+                <p className="text-slate-400 text-sm mt-0.5">최근 7일</p>
               </div>
-            ) : (
-              <ul className="space-y-3 max-h-96 overflow-y-auto pr-1">
-                {[...records].reverse().map((r) => (
-                  <li key={r.date} className="flex items-center gap-4 py-3 border-b border-slate-50 last:border-0">
-                    <span className="text-sm text-slate-400 shrink-0 w-24">{r.date}</span>
-                    <div className="flex shrink-0">
-                      {[1,2,3,4,5].map((n) => (
-                        <span key={n} style={{ filter: n <= r.score ? 'none' : 'grayscale(1) opacity(0.2)' }} className="text-lg">⭐</span>
-                      ))}
-                    </div>
-                    {r.note && <span className="text-sm text-slate-600 truncate">{r.note}</span>}
-                  </li>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleExport}
+                  className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 py-1.5 px-3 rounded-xl hover:bg-blue-50 font-medium"
+                >
+                  💾 저장
+                </button>
+                <button
+                  onClick={handleReset}
+                  className="text-sm text-red-400 hover:text-red-600 py-1.5 px-3 rounded-xl hover:bg-red-50"
+                >
+                  초기화
+                </button>
+              </div>
+            </div>
+
+            {/* 7일 달력 그리드 */}
+            <div className="grid grid-cols-7 gap-2 mb-5">
+              {last7Days.map((date) => {
+                const rec = records.find((r) => r.date === date);
+                const d = new Date(date + 'T00:00:00');
+                const dayLabel = DAY_KO[d.getDay()];
+                const isToday = date === today;
+                const isSat = d.getDay() === 6;
+                const isSun = d.getDay() === 0;
+                return (
+                  <div
+                    key={date}
+                    className={`flex flex-col items-center rounded-2xl py-3 px-1 ${
+                      isToday ? 'ring-2 ring-blue-400 bg-blue-50' : 'bg-slate-50'
+                    }`}
+                  >
+                    <span className={`text-xs font-semibold mb-1 ${
+                      isSun ? 'text-red-400' : isSat ? 'text-blue-400' : 'text-slate-500'
+                    }`}>
+                      {dayLabel}
+                    </span>
+                    <span className="text-xs text-slate-400 mb-2">
+                      {date.slice(5).replace('-', '/')}
+                    </span>
+                    {rec ? (
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="flex flex-wrap justify-center gap-0.5">
+                          {[1,2,3,4,5].map((n) => (
+                            <span
+                              key={n}
+                              className="text-sm leading-none"
+                              style={{ filter: n <= rec.score ? 'none' : 'grayscale(1) opacity(0.2)' }}
+                            >⭐</span>
+                          ))}
+                        </div>
+                        <span className="text-xs font-bold text-slate-600">{rec.score}점</span>
+                      </div>
+                    ) : (
+                      <span className="text-2xl text-slate-200">—</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* 메모 목록 (이번 주 중 메모 있는 날) */}
+            <div className="flex-1 overflow-y-auto space-y-2">
+              {last7Days
+                .map((date) => records.find((r) => r.date === date))
+                .filter((r): r is DayRecord => !!r && !!r.note)
+                .reverse()
+                .map((r) => (
+                  <div key={r.date} className="flex gap-3 items-start bg-slate-50 rounded-xl px-4 py-3">
+                    <span className="text-xs text-slate-400 shrink-0 mt-0.5 w-20">{r.date.slice(5).replace('-', '/')}</span>
+                    <span className="text-sm text-slate-600 leading-relaxed italic">"{r.note}"</span>
+                  </div>
                 ))}
-              </ul>
-            )}
+              {last7Days.every((date) => {
+                const r = records.find((rec) => rec.date === date);
+                return !r || !r.note;
+              }) && (
+                <p className="text-slate-400 text-sm text-center py-4">이번 주 메모가 없습니다.</p>
+              )}
+            </div>
           </div>
 
         </div>
 
-        <p className="text-sm text-slate-400 mt-8 text-center">데이터는 기기에만 저장됩니다.</p>
+        <p className="text-sm text-slate-400 mt-8 text-center">
+          데이터는 이 기기의 브라우저에 저장됩니다 · 💾 저장 버튼으로 JSON 파일 백업 가능
+        </p>
       </div>
     </div>
   );
