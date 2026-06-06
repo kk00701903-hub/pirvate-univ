@@ -50,13 +50,13 @@ const LEVEL_GRAD = [
   { from: '#ffe4e6', to: '#fca5a5', text: '#7f1d1d' },   // Lv5 crimson
 ];
 
-/* ─────────────────────────────── 로고 영역 (280×280) */
+/* ─────────────────────────────── 로고 영역 (iPad 9 최적: 240×240) */
 function LevelLogoArea({ logo, levelIdx }: { logo: string; levelIdx: number }) {
   const [failed, setFailed] = useState(false);
   const grad = LEVEL_GRAD[levelIdx] ?? LEVEL_GRAD[0];
 
   if (!failed) return (
-    <div className="w-[280px] h-[280px] shrink-0 rounded-3xl overflow-hidden
+    <div className="w-[240px] h-[240px] shrink-0 rounded-2xl overflow-hidden
                     shadow-2xl ring-4 ring-white/60">
       <img src={logo} alt={`레벨 ${levelIdx + 1} 로고`}
         className="w-full h-full object-cover"
@@ -65,8 +65,8 @@ function LevelLogoArea({ logo, levelIdx }: { logo: string; levelIdx: number }) {
   );
 
   return (
-    <div className="w-[280px] h-[280px] shrink-0 flex flex-col items-center justify-center
-                    rounded-3xl border-2 border-dashed shadow-inner"
+    <div className="w-[240px] h-[240px] shrink-0 flex flex-col items-center justify-center
+                    rounded-2xl border-2 border-dashed shadow-inner"
       style={{ borderColor: grad.text + '40', background: grad.text + '08' }}>
       <span className="text-5xl mb-3 opacity-30">🏛️</span>
       <span className="text-sm font-medium opacity-40" style={{ color: grad.text }}>
@@ -133,8 +133,8 @@ function SettingsPanel({ levels, records, totalScore, onSave, onAddRecord, onClo
   const inputCls = 'w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-300';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-3xl w-full max-w-[780px] max-h-[88vh] flex flex-col shadow-2xl border border-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-3">
+      <div className="bg-white rounded-3xl w-full max-w-[740px] max-h-[90vh] flex flex-col shadow-2xl border border-slate-100">
         <div className="flex items-center justify-between px-7 py-5 border-b border-slate-100">
           <div className="flex gap-2">
             {(['levels','recovery'] as const).map((t) => (
@@ -307,20 +307,20 @@ function CountdownBanner() {
       style={{ background: 'linear-gradient(135deg,#004b8d 0%,#1a6db5 50%,#9b1b1b 100%)' }}>
       <div className="absolute inset-0 opacity-10"
         style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
-      <div className="relative flex flex-col sm:flex-row items-center justify-between gap-4 p-6">
+      <div className="relative flex items-center justify-between gap-4 p-5">
         <div>
-          <p className="text-white/70 text-xs font-bold tracking-widest uppercase mb-1">2027 CSAT Countdown</p>
-          <p className="text-white text-xl font-bold">2027년 11월 18일(목)</p>
-          <p className="text-yellow-200 text-sm font-semibold mt-0.5">합격의 그날까지, 매일 한 걸음 🎯</p>
+          <p className="text-white/60 text-[10px] font-bold tracking-widest uppercase mb-1">2027 CSAT Countdown</p>
+          <p className="text-white text-base font-bold leading-tight">2027년 11월 18일(목)</p>
+          <p className="text-yellow-200 text-xs font-semibold mt-0.5">합격의 그날까지, 매일 한 걸음 🎯</p>
         </div>
-        <div className="flex gap-3 text-center">
+        <div className="flex gap-2 text-center">
           {[['DAYS',days],['HRS',hrs],['MIN',mins],['SEC',secs]].map(([label, value]) => (
             <div key={label as string}
-              className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-2xl px-4 py-3 min-w-[62px]">
-              <p className="text-3xl font-black text-white tabular-nums leading-none tick-anim">
+              className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl px-3 py-2.5 min-w-[54px]">
+              <p className="text-2xl font-black text-white tabular-nums leading-none tick-anim">
                 {String(value).padStart(2, '0')}
               </p>
-              <p className="text-white/70 text-xs mt-1.5 tracking-widest">{label}</p>
+              <p className="text-white/60 text-[10px] mt-1 tracking-widest">{label}</p>
             </div>
           ))}
         </div>
@@ -384,8 +384,8 @@ export default function App() {
   const DAY_KO = ['일','월','화','수','목','금','토'];
 
   return (
-    /* 밝은 캠퍼스 낮 배경 */
-    <div className="min-h-screen relative flex flex-col items-center px-5 py-8 overflow-x-hidden"
+    /* iPad 9 (810×1080 CSS px) 최적화 */
+    <div className="min-h-screen relative flex flex-col items-center px-4 py-6 overflow-x-hidden"
       style={{ background: 'linear-gradient(160deg, #f0f7ff 0%, #e8f4fd 40%, #fef9ee 100%)' }}>
 
       {/* 배경 장식 원형 블롭 */}
@@ -399,19 +399,20 @@ export default function App() {
           onSave={handleSaveLevels} onAddRecord={handleAddRecord} onClose={() => setShowSettings(false)} />
       )}
 
-      <div className="w-full max-w-[820px] relative z-10">
+      {/* iPad 9 세로 뷰포트 810px → 좌우 16px 여백 → 콘텐츠 778px */}
+      <div className="w-full max-w-[778px] relative z-10">
 
         {/* ── 헤더 */}
-        <div className="flex items-center justify-between mb-7">
+        <div className="flex items-center justify-between mb-5">
           <div>
             <div className="flex items-center gap-2.5 mb-1">
-              <span className="text-3xl">🎓</span>
-              <h1 className="text-3xl font-black text-slate-800 tracking-tight">대학 레벨업</h1>
+              <span className="text-2xl">🎓</span>
+              <h1 className="text-2xl font-black text-slate-800 tracking-tight">대학 레벨업</h1>
             </div>
-            <p className="text-slate-400 text-sm pl-1">고려대 식품공학과까지, 오늘도 캠퍼스를 향해</p>
+            <p className="text-slate-400 text-xs pl-1">고려대 식품공학과까지, 오늘도 캠퍼스를 향해</p>
           </div>
           <button onClick={() => setShowSettings(true)}
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl font-semibold text-sm
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-semibold text-sm
                        bg-white border border-slate-200 text-slate-600 shadow-sm
                        hover:bg-slate-50 active:scale-95 transition-all">
             ⚙️ 설정
@@ -422,7 +423,7 @@ export default function App() {
         <CountdownBanner />
 
         {/* ── 레벨 히어로 카드 */}
-        <div className="w-full rounded-[28px] mb-6 overflow-hidden shadow-xl relative"
+        <div className="w-full rounded-[24px] mb-5 overflow-hidden shadow-xl relative"
           style={{ background: `linear-gradient(135deg, ${grad.from} 0%, ${grad.to} 100%)` }}>
 
           {/* 상단 컬러 스트라이프 */}
@@ -433,9 +434,9 @@ export default function App() {
               backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000' fill-opacity='1'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
             }} />
 
-          <div className="relative p-8">
+          <div className="relative p-6">
             {/* 레벨 뱃지 */}
-            <div className="flex items-center gap-3 mb-5">
+            <div className="flex items-center gap-3 mb-4">
               <span className="text-[11px] font-black tracking-[0.18em] uppercase"
                 style={{ color: grad.text + 'aa' }}>Current Level</span>
               <div className="h-px flex-1 opacity-20" style={{ background: grad.text }} />
@@ -445,19 +446,19 @@ export default function App() {
               </span>
             </div>
 
-            <div className="flex items-center gap-8">
+            <div className="flex items-center gap-6">
               {/* 왼쪽 텍스트 */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold tracking-widest uppercase mb-2"
+                <p className="text-xs font-bold tracking-widest uppercase mb-1.5"
                   style={{ color: grad.text + 'bb' }}>
                   {level.emoji} {level.subtitle}
                 </p>
-                <h2 className="text-5xl font-black leading-none mb-4 tracking-tight" style={{ color: grad.text }}>
+                <h2 className="text-4xl font-black leading-none mb-3 tracking-tight" style={{ color: grad.text }}>
                   {level.name}
                 </h2>
-                <div className="flex flex-wrap gap-2 mb-7">
+                <div className="flex flex-wrap gap-1.5 mb-5">
                   {level.schools.map((s) => (
-                    <span key={s} className="text-xs font-semibold rounded-full px-3 py-1.5"
+                    <span key={s} className="text-xs font-semibold rounded-full px-2.5 py-1"
                       style={{
                         color: grad.text,
                         background: grad.text + '18',
@@ -470,14 +471,14 @@ export default function App() {
 
                 {/* 진행도 바 */}
                 <div>
-                  <div className="flex justify-between text-xs mb-2 font-medium"
+                  <div className="flex justify-between text-xs mb-1.5 font-medium"
                     style={{ color: grad.text + '88' }}>
                     <span>진행도</span>
-                    <span className="font-black text-sm" style={{ color: grad.text }}>
+                    <span className="font-black" style={{ color: grad.text }}>
                       {totalScore}<span className="font-normal opacity-60"> / 100점</span>
                     </span>
                   </div>
-                  <div className="h-3.5 rounded-full overflow-hidden border"
+                  <div className="h-3 rounded-full overflow-hidden border"
                     style={{ background: grad.text + '18', borderColor: grad.text + '25' }}>
                     <div className="h-full rounded-full transition-all duration-700"
                       style={{
@@ -486,7 +487,7 @@ export default function App() {
                         boxShadow: `0 0 10px ${level.color}80`,
                       }} />
                   </div>
-                  <div className="flex justify-between mt-1.5 px-0.5"
+                  <div className="flex justify-between mt-1 px-0.5"
                     style={{ color: grad.text + '50' }}>
                     {levels.map((l) => (
                       <span key={l.min} className="text-[10px]">{l.min}</span>
@@ -504,22 +505,22 @@ export default function App() {
           </div>
         </div>
 
-        {/* ── 2열 그리드 */}
-        <div className="grid grid-cols-2 gap-5">
+        {/* ── 2열 그리드 (iPad 9: 각 컬럼 ~375px) */}
+        <div className="grid grid-cols-2 gap-4">
 
           {/* 오늘의 만족도 */}
-          <div className="rounded-3xl bg-white border border-slate-200/80 p-7 shadow-lg">
+          <div className="rounded-2xl bg-white border border-slate-200/80 p-5 shadow-lg">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xl">✏️</span>
-              <h2 className="font-black text-slate-800 text-xl">오늘의 만족도</h2>
+              <span className="text-lg">✏️</span>
+              <h2 className="font-black text-slate-800 text-lg">오늘의 만족도</h2>
             </div>
-            <p className="text-slate-400 text-sm mb-5 pl-8">{today}</p>
+            <p className="text-slate-400 text-xs mb-4 pl-7">{today}</p>
 
             {todayRecord ? (
-              <div className="flex flex-col items-center justify-center py-6 gap-3">
-                <div className="w-16 h-16 rounded-full bg-green-100 border-2 border-green-300
-                                flex items-center justify-center text-3xl shadow-sm">✅</div>
-                <p className="text-green-600 font-bold text-lg">오늘 기록 완료!</p>
+              <div className="flex flex-col items-center justify-center py-5 gap-3">
+                <div className="w-14 h-14 rounded-full bg-green-100 border-2 border-green-300
+                                flex items-center justify-center text-2xl shadow-sm">✅</div>
+                <p className="text-green-600 font-bold text-base">오늘 기록 완료!</p>
                 <div className="flex gap-1">
                   {[1,2,3,4,5].map((n) => (
                     <span key={n} className="text-2xl"
@@ -536,15 +537,15 @@ export default function App() {
               <>
                 <StarPicker value={score} onChange={setScore} />
                 <textarea
-                  className="w-full border border-slate-200 rounded-2xl p-4 text-sm
-                             text-slate-700 placeholder-slate-300 resize-none mt-5
+                  className="w-full border border-slate-200 rounded-xl p-3 text-sm
+                             text-slate-700 placeholder-slate-300 resize-none mt-4
                              focus:outline-none focus:ring-2 focus:ring-blue-300 bg-slate-50"
-                  rows={4}
+                  rows={3}
                   placeholder="오늘 하루 한 마디 (선택)"
                   value={note} onChange={(e) => setNote(e.target.value)}
                 />
                 <button onClick={handleSave}
-                  className="mt-4 w-full py-4 rounded-2xl font-black text-white text-base
+                  className="mt-3 w-full py-3.5 rounded-xl font-black text-white text-base
                              transition-all active:scale-95 shadow-md"
                   style={{
                     background: saved
@@ -559,23 +560,23 @@ export default function App() {
           </div>
 
           {/* 이번 주 기록 */}
-          <div className="rounded-3xl bg-white border border-slate-200/80 p-7 shadow-lg flex flex-col">
+          <div className="rounded-2xl bg-white border border-slate-200/80 p-5 shadow-lg flex flex-col">
             <div className="flex justify-between items-start mb-5">
               <div className="flex items-center gap-2">
-                <span className="text-xl">📅</span>
+                <span className="text-lg">📅</span>
                 <div>
-                  <h2 className="font-black text-slate-800 text-xl">이번 주 기록</h2>
+                  <h2 className="font-black text-slate-800 text-lg">이번 주 기록</h2>
                   <p className="text-slate-400 text-xs mt-0.5">최근 7일</p>
                 </div>
               </div>
               <div className="flex gap-1.5">
                 <button onClick={handleExport}
-                  className="text-xs text-blue-600 hover:text-blue-700 py-1.5 px-3 rounded-xl
+                  className="text-xs text-blue-600 hover:text-blue-700 py-1.5 px-2.5 rounded-xl
                              hover:bg-blue-50 font-semibold transition-colors">
                   💾
                 </button>
                 <button onClick={handleReset}
-                  className="text-xs text-red-400 hover:text-red-500 py-1.5 px-3 rounded-xl
+                  className="text-xs text-red-400 hover:text-red-500 py-1.5 px-2.5 rounded-xl
                              hover:bg-red-50 transition-colors">
                   초기화
                 </button>
@@ -583,38 +584,36 @@ export default function App() {
             </div>
 
             {/* 7일 달력 */}
-            <div className="grid grid-cols-7 gap-1.5 mb-5">
+            <div className="grid grid-cols-7 gap-1 mb-4">
               {last7Days.map((date) => {
-                const rec    = records.find((r) => r.date === date);
-                const d      = new Date(date + 'T00:00:00');
+                const rec     = records.find((r) => r.date === date);
+                const d       = new Date(date + 'T00:00:00');
                 const isToday = date === today;
-                const isSat  = d.getDay() === 6;
-                const isSun  = d.getDay() === 0;
+                const isSat   = d.getDay() === 6;
+                const isSun   = d.getDay() === 0;
                 return (
                   <div key={date}
-                    className={`flex flex-col items-center rounded-2xl py-3 px-1 border transition-colors ${
-                      isToday
-                        ? 'bg-blue-50 border-blue-200 shadow-sm'
-                        : 'bg-slate-50 border-slate-100'
+                    className={`flex flex-col items-center rounded-xl py-2.5 px-0.5 border transition-colors ${
+                      isToday ? 'bg-blue-50 border-blue-200 shadow-sm' : 'bg-slate-50 border-slate-100'
                     }`}>
-                    <span className={`text-xs font-bold mb-1 ${isSun?'text-red-400':isSat?'text-blue-500':'text-slate-400'}`}>
+                    <span className={`text-[11px] font-bold mb-0.5 ${isSun?'text-red-400':isSat?'text-blue-500':'text-slate-400'}`}>
                       {DAY_KO[d.getDay()]}
                     </span>
-                    <span className="text-[10px] text-slate-300 mb-2">
+                    <span className="text-[9px] text-slate-300 mb-1.5">
                       {date.slice(5).replace('-','/')}
                     </span>
                     {rec ? (
-                      <div className="flex flex-col items-center gap-1">
+                      <div className="flex flex-col items-center gap-0.5">
                         <div className="flex flex-wrap justify-center gap-0.5">
                           {[1,2,3,4,5].map((n) => (
-                            <span key={n} className="text-xs"
+                            <span key={n} className="text-[10px]"
                               style={{ filter: n<=rec.score ? 'none' : 'grayscale(1) opacity(0.15)' }}>⭐</span>
                           ))}
                         </div>
-                        <span className="text-xs font-black text-amber-500">{rec.score}점</span>
+                        <span className="text-[10px] font-black text-amber-500">{rec.score}점</span>
                       </div>
                     ) : (
-                      <span className="text-slate-200 text-lg">—</span>
+                      <span className="text-slate-200 text-base">—</span>
                     )}
                   </div>
                 );
@@ -622,21 +621,21 @@ export default function App() {
             </div>
 
             {/* 메모 목록 */}
-            <div className="flex-1 overflow-y-auto space-y-2">
+            <div className="flex-1 overflow-y-auto space-y-1.5">
               {last7Days
                 .map((date) => records.find((r) => r.date === date))
                 .filter((r): r is DayRecord => !!r && !!r.note)
                 .reverse()
                 .map((r) => (
-                  <div key={r.date} className="flex gap-3 items-start bg-slate-50 rounded-xl px-4 py-3 border border-slate-100">
-                    <span className="text-xs text-slate-300 shrink-0 mt-0.5 w-12">
+                  <div key={r.date} className="flex gap-2 items-start bg-slate-50 rounded-xl px-3 py-2.5 border border-slate-100">
+                    <span className="text-xs text-slate-300 shrink-0 mt-0.5 w-10">
                       {r.date.slice(5).replace('-','/')}
                     </span>
-                    <span className="text-sm text-slate-500 leading-relaxed italic">"{r.note}"</span>
+                    <span className="text-xs text-slate-500 leading-relaxed italic">"{r.note}"</span>
                   </div>
                 ))}
               {last7Days.every((date) => { const r = records.find((rc) => rc.date === date); return !r || !r.note; }) && (
-                <p className="text-slate-300 text-sm text-center py-4">이번 주 메모가 없습니다.</p>
+                <p className="text-slate-300 text-xs text-center py-3">이번 주 메모가 없습니다.</p>
               )}
             </div>
           </div>
