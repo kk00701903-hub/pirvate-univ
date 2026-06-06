@@ -1,0 +1,7 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <rect width="120" height="120" rx="16" fill="#004b8d"/>
+  <path d="M60 18 L88 36 L88 78 L60 96 L32 78 L32 36 Z" fill="none" stroke="white" stroke-width="2.5" opacity="0.8"/>
+  <circle cx="60" cy="52" r="14" fill="white" opacity="0.25"/>
+  <text x="60" y="57" text-anchor="middle" fill="white" font-size="13" font-family="Arial,sans-serif" font-weight="bold">KU</text>
+  <text x="60" y="80" text-anchor="middle" fill="white" font-size="9" font-family="Arial,sans-serif">고려대학교</text>
+</svg>

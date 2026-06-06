@@ -18,12 +18,12 @@ function LogoOrEmoji({ logo, emoji }: { logo: string; emoji: string }) {
 }
 
 const UNIVERSITY_LEVELS = [
-  { name: '지방 전문대', min: 0, max: 19, color: '#6b7280', emoji: '🌱', logo: '/logos/level1.png' },
-  { name: '지방 4년제', min: 20, max: 39, color: '#10b981', emoji: '🌿', logo: '/logos/level2.png' },
-  { name: '인서울 하위', min: 40, max: 59, color: '#3b82f6', emoji: '🌳', logo: '/logos/level3.png' },
-  { name: '인서울 중위', min: 60, max: 79, color: '#8b5cf6', emoji: '⭐', logo: '/logos/level4.png' },
-  { name: '인서울 상위', min: 80, max: 94, color: '#f59e0b', emoji: '🔥', logo: '/logos/level5.png' },
-  { name: '고려대학교', min: 95, max: 100, color: '#004b8d', emoji: '🏆', logo: '/logos/level6.png' },
+  { name: '지방 전문대', min: 0, max: 19, color: '#6b7280', emoji: '🌱', logo: '/logos/level1.svg' },
+  { name: '지방 4년제', min: 20, max: 39, color: '#10b981', emoji: '🌿', logo: '/logos/level2.svg' },
+  { name: '인서울 하위', min: 40, max: 59, color: '#3b82f6', emoji: '🌳', logo: '/logos/level3.svg' },
+  { name: '인서울 중위', min: 60, max: 79, color: '#8b5cf6', emoji: '⭐', logo: '/logos/level4.svg' },
+  { name: '인서울 상위', min: 80, max: 94, color: '#f59e0b', emoji: '🔥', logo: '/logos/level5.svg' },
+  { name: '고려대학교', min: 95, max: 100, color: '#004b8d', emoji: '🏆', logo: '/logos/level6.svg' },
 ];
 
 const STORAGE_KEY = 'univer_records';
