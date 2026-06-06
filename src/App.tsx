@@ -159,34 +159,39 @@ type DayRecord = { date: string; score: number; note: string; };
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
+/* ─────────────────────────────────────────────────────────
+   레벨 점수 설계 기준
+   Lv9 진입 = 14일 × 4.5점/일 = 63점 (2주 꾸준히 4.5+ 달성 시)
+   Lv1~8: 0~62점을 7~8점 간격으로 균등 배분
+──────────────────────────────────────────────────────── */
 const DEFAULT_LEVELS: LevelConfig[] = [
   { name: '레벨 1', subtitle: '출발! 첫 번째 목표',
     schools: ['충남대 식품공학과'],
-    min: 0,  max: 10,  color: '#64748b', emoji: '🌱', logo: `${BASE}/logos/level1.png` },
-  { name: '레벨 2', subtitle: '한 단계 업!',
+    min: 0,  max: 7,   color: '#64748b', emoji: '🌱', logo: `${BASE}/logos/level1.png` },
+  { name: '레벨 2', subtitle: '꾸준히 한 걸음',
     schools: ['인하대 식품영양학과'],
-    min: 11, max: 21,  color: '#0d9488', emoji: '🌿', logo: `${BASE}/logos/level2.png` },
+    min: 8,  max: 15,  color: '#0d9488', emoji: '🌿', logo: `${BASE}/logos/level2.png` },
   { name: '레벨 3', subtitle: '성장 중',
     schools: ['서울과기대 식품공학과'],
-    min: 22, max: 32,  color: '#0284c7', emoji: '🚀', logo: `${BASE}/logos/level3.png` },
-  { name: '레벨 4', subtitle: '절반을 향해',
+    min: 16, max: 23,  color: '#0284c7', emoji: '🚀', logo: `${BASE}/logos/level3.png` },
+  { name: '레벨 4', subtitle: '일주일 돌파',
     schools: ['단국대 식품공학과'],
-    min: 33, max: 43,  color: '#4338ca', emoji: '⚡', logo: `${BASE}/logos/level4.png` },
-  { name: '레벨 5', subtitle: '중간 지점 돌파',
+    min: 24, max: 31,  color: '#4338ca', emoji: '⚡', logo: `${BASE}/logos/level4.png` },
+  { name: '레벨 5', subtitle: '절반을 넘어서',
     schools: ['세종대 식품생명공학과'],
-    min: 44, max: 54,  color: '#7c3aed', emoji: '🌟', logo: `${BASE}/logos/level5.png` },
+    min: 32, max: 39,  color: '#7c3aed', emoji: '🌟', logo: `${BASE}/logos/level5.png` },
   { name: '레벨 6', subtitle: '상위권 진입',
     schools: ['동국대 식품생명공학과'],
-    min: 55, max: 65,  color: '#ea580c', emoji: '🔥', logo: `${BASE}/logos/level6.png` },
-  { name: '레벨 7', subtitle: '인서울 명문',
+    min: 40, max: 47,  color: '#ea580c', emoji: '🔥', logo: `${BASE}/logos/level6.png` },
+  { name: '레벨 7', subtitle: '10일 꾸준함의 증거',
     schools: ['경희대 식품생명공학과'],
-    min: 66, max: 76,  color: '#16a34a', emoji: '🏅', logo: `${BASE}/logos/level7.png` },
-  { name: '레벨 8', subtitle: '최상위권',
+    min: 48, max: 55,  color: '#16a34a', emoji: '🏅', logo: `${BASE}/logos/level7.png` },
+  { name: '레벨 8', subtitle: '거의 다 왔다!',
     schools: ['성균관대 식품생명공학과'],
-    min: 77, max: 87,  color: '#b45309', emoji: '💎', logo: `${BASE}/logos/level8.png` },
-  { name: '레벨 9', subtitle: '최종 목표',
+    min: 56, max: 62,  color: '#b45309', emoji: '💎', logo: `${BASE}/logos/level8.png` },
+  { name: '레벨 9', subtitle: '2주 4.5점 이상 — 최종 목표',
     schools: ['고려대 식품공학과'],
-    min: 88, max: 100, color: '#9b1b1b', emoji: '🏆', logo: `${BASE}/logos/level9.png` },
+    min: 63, max: 100, color: '#9b1b1b', emoji: '🏆', logo: `${BASE}/logos/level9.png` },
 ];
 
 const STORAGE_KEY = 'univer_records';
