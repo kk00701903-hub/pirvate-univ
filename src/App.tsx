@@ -19,20 +19,20 @@ function LogoOrEmoji({ logo, emoji }: { logo: string; emoji: string }) {
 
 /**
  * 식품공학과/식품영양학과/식품생명공학과 기준 레벨
- * 2024~2026 정시·수시 입결 데이터 반영
+ * 2024~2026 정시·수시 입결 데이터 반영 (최저 기준: 충남대)
  */
 const UNIVERSITY_LEVELS = [
   {
-    name: '지방 전문대',
-    subtitle: '식품계열 전문대',
-    schools: ['각 지역 전문대 식품관련학과'],
+    name: '지방 국립대 (하위)',
+    subtitle: '식품공학과 · 시작점',
+    schools: ['충남대', '전남대', '경상국립대', '강원대', '제주대'],
     min: 0, max: 19,
     color: '#6b7280', emoji: '🌱', logo: '/logos/level1.svg',
   },
   {
-    name: '지방 국립/사립대',
+    name: '지방 국립대 (상위)',
     subtitle: '식품공학과',
-    schools: ['부산대', '경북대', '충남대', '전남대', '강원대', '인하대'],
+    schools: ['부산대', '경북대', '전북대', '인하대', '충북대'],
     min: 20, max: 39,
     color: '#10b981', emoji: '🌿', logo: '/logos/level2.svg',
   },

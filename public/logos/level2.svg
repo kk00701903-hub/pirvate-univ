@@ -4,5 +4,5 @@
   <circle cx="60" cy="50" r="14" fill="white" opacity="0.2"/>
   <text x="60" y="55" text-anchor="middle" fill="white" font-size="12" font-family="Arial,sans-serif" font-weight="bold">PNU</text>
   <text x="60" y="72" text-anchor="middle" fill="white" font-size="8" font-family="Arial,sans-serif">부산대·경북대</text>
-  <text x="60" y="84" text-anchor="middle" fill="white" font-size="8" font-family="Arial,sans-serif">충남대·강원대</text>
+  <text x="60" y="84" text-anchor="middle" fill="white" font-size="8" font-family="Arial,sans-serif">전북대·인하대</text>
 </svg>
