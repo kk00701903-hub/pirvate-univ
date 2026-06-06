@@ -4,6 +4,9 @@
   --color-primary: #004b8d;
   --color-primary-light: #1a6db5;
   --color-accent: #f59e0b;
+  --color-campus-dark: #0a1628;
+  --color-campus-navy: #0d2149;
+  --color-campus-gold: #d4a017;
   --font-sans: 'Pretendard Variable', system-ui, sans-serif;
 }
 
@@ -13,7 +16,36 @@
 
 body {
   font-family: var(--font-sans);
-  background: #f8fafc;
+  background: #0a1628;
   margin: 0;
   padding: 0;
 }
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.text-gold-shimmer {
+  background: linear-gradient(90deg, #d4a017, #f9d423, #d4a017, #f9d423);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 4s linear infinite;
+}
+
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(212,160,23,0.5); }
+  70%  { box-shadow: 0 0 0 16px rgba(212,160,23,0); }
+  100% { box-shadow: 0 0 0 0 rgba(212,160,23,0); }
+}
+.ring-pulse {
+  animation: pulse-ring 2.5s ease-out infinite;
+}
+
+@keyframes count-tick {
+  0%   { transform: translateY(0); opacity: 1; }
+  50%  { transform: translateY(-4px); opacity: 0.6; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.tick-anim { animation: count-tick 1s ease-in-out infinite; }
