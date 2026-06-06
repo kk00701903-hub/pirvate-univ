@@ -164,42 +164,45 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 /* ─────────────────────────────────────────────────────────
    레벨 점수 설계 기준
-   Lv9 진입 = 14일 × 4.5점/일 = 63점 (2주 꾸준히 4.5+ 달성 시)
-   Lv1~8: 0~62점을 7~8점 간격으로 균등 배분
+   수능 2주 전(2027-11-04)까지 매일 4.5점 기록 시 레벨 9 도달
+   오늘(2026-06-07)부터 515일 × 4.5점/일 = 2318점 → Lv9 진입
+   Lv1~8: 0~2317점 구간을 290점 간격으로 균등 배분 (≈ 64일 / 레벨)
 ──────────────────────────────────────────────────────── */
+const LV9_THRESHOLD = 2318; // 515일 × 4.5점
+
 const DEFAULT_LEVELS: LevelConfig[] = [
   { name: '레벨 1', subtitle: '출발! 첫 번째 목표',
     schools: ['충남대 식품공학과'],
-    min: 0,  max: 7,   color: '#64748b', emoji: '🌱', logo: `${BASE}/logos/level1.png` },
-  { name: '레벨 2', subtitle: '꾸준히 한 걸음',
+    min: 0,    max: 289,   color: '#64748b', emoji: '🌱', logo: `${BASE}/logos/level1.png` },
+  { name: '레벨 2', subtitle: '두 달의 꾸준함',
     schools: ['인하대 식품영양학과'],
-    min: 8,  max: 15,  color: '#0d9488', emoji: '🌿', logo: `${BASE}/logos/level2.png` },
-  { name: '레벨 3', subtitle: '성장 중',
+    min: 290,  max: 579,   color: '#0d9488', emoji: '🌿', logo: `${BASE}/logos/level2.png` },
+  { name: '레벨 3', subtitle: '100일 돌파!',
     schools: ['서울과기대 식품공학과'],
-    min: 16, max: 23,  color: '#0284c7', emoji: '🚀', logo: `${BASE}/logos/level3.png` },
-  { name: '레벨 4', subtitle: '일주일 돌파',
+    min: 580,  max: 869,   color: '#0284c7', emoji: '🚀', logo: `${BASE}/logos/level3.png` },
+  { name: '레벨 4', subtitle: '6개월 성장',
     schools: ['단국대 식품공학과'],
-    min: 24, max: 31,  color: '#4338ca', emoji: '⚡', logo: `${BASE}/logos/level4.png` },
-  { name: '레벨 5', subtitle: '절반을 넘어서',
+    min: 870,  max: 1159,  color: '#4338ca', emoji: '⚡', logo: `${BASE}/logos/level4.png` },
+  { name: '레벨 5', subtitle: '중간 지점 돌파!',
     schools: ['세종대 식품생명공학과'],
-    min: 32, max: 39,  color: '#7c3aed', emoji: '🌟', logo: `${BASE}/logos/level5.png` },
+    min: 1160, max: 1449,  color: '#7c3aed', emoji: '🌟', logo: `${BASE}/logos/level5.png` },
   { name: '레벨 6', subtitle: '상위권 진입',
     schools: ['동국대 식품생명공학과'],
-    min: 40, max: 47,  color: '#ea580c', emoji: '🔥', logo: `${BASE}/logos/level6.png` },
-  { name: '레벨 7', subtitle: '10일 꾸준함의 증거',
+    min: 1450, max: 1739,  color: '#ea580c', emoji: '🔥', logo: `${BASE}/logos/level6.png` },
+  { name: '레벨 7', subtitle: '거의 다 왔다!',
     schools: ['경희대 식품생명공학과'],
-    min: 48, max: 55,  color: '#16a34a', emoji: '🏅', logo: `${BASE}/logos/level7.png` },
-  { name: '레벨 8', subtitle: '거의 다 왔다!',
+    min: 1740, max: 2029,  color: '#16a34a', emoji: '🏅', logo: `${BASE}/logos/level7.png` },
+  { name: '레벨 8', subtitle: '수능 D-100 이내',
     schools: ['성균관대 식품생명공학과'],
-    min: 56, max: 62,  color: '#b45309', emoji: '💎', logo: `${BASE}/logos/level8.png` },
-  { name: '레벨 9', subtitle: '2주 4.5점 이상 — 최종 목표',
+    min: 2030, max: 2317,  color: '#b45309', emoji: '💎', logo: `${BASE}/logos/level8.png` },
+  { name: '레벨 9', subtitle: '수능 2주 전 최종 목표 달성!',
     schools: ['고려대 식품공학과'],
-    min: 63, max: 100, color: '#9b1b1b', emoji: '🏆', logo: `${BASE}/logos/level9.png` },
+    min: 2318, max: 9999999, color: '#9b1b1b', emoji: '🏆', logo: `${BASE}/logos/level9.png` },
 ];
 
 const STORAGE_KEY = 'univer_records';
 const LEVELS_KEY  = 'univer_levels';
-const LEVELS_VER  = 'v9-2506';  // 9레벨 구조로 업데이트
+const LEVELS_VER  = 'v9-2607';  // 수능 2주 전 Lv9 도달 기준으로 재설계
 const THEME_KEY   = 'univer_theme';
 
 const STAR_LABELS: Record<number, string> = {
@@ -328,7 +331,7 @@ function SettingsPanel({ levels, records, totalScore, themeId, onSave, onAddReco
     if (!recDate) return;
     if (records.find((r) => r.date===recDate)) { setRecMsg(`⚠️ ${recDate} 이미 기록 있음`); return; }
     onAddRecord({ date: recDate, score: recScore, note: recNote });
-    setRecMsg(`✅ ${recDate} · ${recScore}점 추가! (누적 ${Math.min(100,totalScore+recScore)}점)`);
+    setRecMsg(`✅ ${recDate} · ${recScore}점 추가! (누적 ${(totalScore+recScore).toLocaleString()}점)`);
     setRecNote('');
   };
 
@@ -437,7 +440,10 @@ function SettingsPanel({ levels, records, totalScore, themeId, onSave, onAddReco
               <div className="text-5xl font-black" style={{ color:th.tabActive }}>{totalScore}</div>
               <div>
                 <p className="font-bold" style={{ color:th.textH }}>현재 누적 점수</p>
-                <p className="text-sm" style={{ color:th.textSub }}>{records.length}일 기록됨 (최대 100점)</p>
+                <p className="text-sm" style={{ color:th.textSub }}>
+                  {records.length}일 기록 · 누적 {records.reduce((s,r)=>s+r.score,0).toLocaleString()}점
+                  / 목표 {LV9_THRESHOLD.toLocaleString()}점
+                </p>
               </div>
             </div>
             <div className="rounded-2xl p-5 border"
@@ -607,9 +613,12 @@ export default function App() {
 
   const today    = getTodayString();
   const todayRec = records.find((r) => r.date === today);
-  const total    = Math.min(100, records.reduce((s, r) => s + r.score, 0));
+  const total    = records.reduce((s, r) => s + r.score, 0);
   const level    = getLevel(total, levels);
   const lvIdx    = levels.indexOf(level);
+  const levelPct = level.max === 9999999
+    ? 100
+    : Math.min(100, Math.round(((total - level.min) / (level.max - level.min + 1)) * 100));
   const grad     = (effTheme === 'dark' ? GRAD_DARK : GRAD_LIGHT)[lvIdx] ?? GRAD_LIGHT[0];
 
   useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); }, [records]);
@@ -743,26 +752,31 @@ export default function App() {
                       </span>
                     ))}
                   </div>
-                  {/* 진행 바 */}
+                  {/* 진행 바 — 현재 레벨 내 진행도 */}
                   <div>
                     <div className="flex justify-between text-xs mb-1.5" style={{ color:grad.text+'99' }}>
-                      <span className="font-medium">진행도</span>
+                      <span className="font-medium">레벨 내 진행도</span>
                       <span className="font-black" style={{ color:grad.text }}>
-                        {total} <span className="font-normal opacity-55">/ 100점</span>
+                        {levelPct}%
                       </span>
                     </div>
                     <div className="h-3 rounded-full overflow-hidden"
                       style={{ background:grad.text+'22', border:`1px solid ${grad.text}25` }}>
                       <div className="h-full rounded-full transition-all duration-700"
                         style={{
-                          width:`${total}%`,
+                          width:`${levelPct}%`,
                           background:level.color,
                           boxShadow:`0 0 8px ${level.color}99`,
                         }} />
                     </div>
-                    <div className="flex justify-between mt-1 opacity-45" style={{ color:grad.text }}>
-                      {levels.map((l) => <span key={l.min} className="text-[10px]">{l.min}</span>)}
-                      <span className="text-[10px]">100</span>
+                    {/* 전체 누적 & 고려대 목표까지 남은 점수 */}
+                    <div className="flex justify-between mt-1.5 opacity-60" style={{ color:grad.text }}>
+                      <span className="text-[10px]">누적 {total.toLocaleString()}점</span>
+                      <span className="text-[10px]">
+                        {total >= LV9_THRESHOLD
+                          ? '🏆 고려대 목표 달성!'
+                          : `Lv9까지 ${(LV9_THRESHOLD - total).toLocaleString()}점`}
+                      </span>
                     </div>
                   </div>
                 </div>
