@@ -6,20 +6,30 @@
     <title>대학 레벨업 만족도 기록</title>
     <meta name="description" content="매일 만족도를 기록하고 고려대까지 레벨업! 수험생 동기부여 앱" />
     <!-- PWA -->
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="manifest" href="/pirvate-univ/manifest.json" />
     <meta name="theme-color" content="#004b8d" />
     <meta name="mobile-web-app-capable" content="yes" />
+    <!-- iOS/iPad PWA -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="대학 레벨업" />
-    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="/pirvate-univ/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/pirvate-univ/apple-touch-icon-152.png" />
+    <link rel="apple-touch-icon" sizes="167x167" href="/pirvate-univ/apple-touch-icon-167.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/pirvate-univ/apple-touch-icon-180.png" />
+    <!-- PWA standard icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/pirvate-univ/icon-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/pirvate-univ/icon-512.png" />
+    <!-- iPad splash screens -->
+    <meta name="msapplication-TileColor" content="#004b8d" />
     <!-- Pretendard font -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" />
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(() => {});
+          navigator.serviceWorker.register('/pirvate-univ/sw.js').catch(() => {});
         });
       }
     </script>

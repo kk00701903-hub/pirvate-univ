@@ -3,10 +3,28 @@
   "short_name": "대학 레벨업",
   "description": "매일 만족도를 기록하고 고려대까지 레벨업! 수험생 동기부여 앱",
   "start_url": "/pirvate-univ/",
+  "scope": "/pirvate-univ/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#f8fafc",
   "theme_color": "#004b8d",
+  "lang": "ko",
   "icons": [
+    {
+      "src": "/pirvate-univ/apple-touch-icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "/pirvate-univ/apple-touch-icon-167.png",
+      "sizes": "167x167",
+      "type": "image/png"
+    },
+    {
+      "src": "/pirvate-univ/apple-touch-icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
     {
       "src": "/pirvate-univ/icon-192.png",
       "sizes": "192x192",
@@ -15,7 +33,8 @@
     {
       "src": "/pirvate-univ/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
