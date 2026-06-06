@@ -235,6 +235,64 @@ function SettingsPanel({
 }
 
 /* ───────────────────────────────────────────────
+   수능 카운트다운 컴포넌트
+   2027년 수능: 11월 18일(목)
+─────────────────────────────────────────────── */
+const SUNEUNG_DATE = new Date('2027-11-18T00:00:00');
+
+function CountdownBanner() {
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const diffMs = SUNEUNG_DATE.getTime() - now.getTime();
+  const isOver = diffMs <= 0;
+
+  const totalSecs = Math.floor(diffMs / 1000);
+  const days  = Math.floor(totalSecs / 86400);
+  const hours = Math.floor((totalSecs % 86400) / 3600);
+  const mins  = Math.floor((totalSecs % 3600) / 60);
+  const secs  = totalSecs % 60;
+
+  if (isOver) {
+    return (
+      <div className="w-full rounded-3xl bg-gradient-to-r from-yellow-400 to-orange-400 p-6 mb-6 text-white text-center shadow-lg">
+        <p className="text-2xl font-bold">🎉 수능 당일입니다! 최선을 다하세요!</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full rounded-3xl bg-gradient-to-r from-[#8b1a1a] to-[#004b8d] p-6 mb-6 text-white shadow-xl">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-white/70 text-sm font-medium mb-1">2027학년도 대학수학능력시험</p>
+          <p className="text-2xl font-bold">2027년 11월 18일(목) · D-<span className="text-yellow-300">{days}</span></p>
+        </div>
+        <div className="flex gap-3 text-center">
+          {[
+            { label: '일', value: days },
+            { label: '시간', value: hours },
+            { label: '분', value: mins },
+            { label: '초', value: secs },
+          ].map(({ label, value }) => (
+            <div key={label} className="bg-white/15 rounded-2xl px-4 py-3 min-w-[60px]">
+              <p className="text-2xl font-bold tabular-nums leading-none">
+                {String(value).padStart(2, '0')}
+              </p>
+              <p className="text-white/70 text-xs mt-1">{label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ───────────────────────────────────────────────
    메인 앱
 ─────────────────────────────────────────────── */
 export default function App() {
@@ -294,10 +352,10 @@ export default function App() {
       <div className="w-full max-w-[820px]">
 
         {/* 헤더 */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-4xl font-bold text-slate-800 mb-1">대학 레벨업</h1>
-            <p className="text-slate-500 text-base">매일 만족도를 기록하고 고려대까지 레벨업! 🎯</p>
+            <p className="text-slate-500 text-base">매일 만족도를 기록하고 고려대 식품공학과까지! 🎯</p>
           </div>
           <button
             onClick={() => setShowSettings(true)}
@@ -306,6 +364,9 @@ export default function App() {
             ⚙️ 설정
           </button>
         </div>
+
+        {/* 수능 카운트다운 */}
+        <CountdownBanner />
 
         {/* 레벨 카드 */}
         <div
