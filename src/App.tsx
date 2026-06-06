@@ -1,111 +1,155 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 
-/* ═══════════════════════════════════════
-   테마 토큰
-═══════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   테마 토큰  — 모든 색상을 여기서 정의
+══════════════════════════════════════════════ */
 type ThemeId = 'light' | 'dark';
 
+/* ── 주간 테마 */
 const LIGHT = {
-  id: 'light' as ThemeId,
-  pageBg:        'linear-gradient(160deg, #f0f7ff 0%, #e8f4fd 40%, #fef9ee 100%)',
-  blob1:         'rgba(186,230,255,0.35)',
-  blob2:         'rgba(254,202,202,0.28)',
-  bodyBg:        '#f0f7ff',
-  cardBg:        '#ffffff',
-  cardBorder:    'rgba(226,232,240,0.9)',
-  textH:         '#1e293b',
-  textSub:       '#94a3b8',
-  textLabel:     '#64748b',
-  textBody:      '#475569',
-  inputBg:       '#f8fafc',
-  inputBorder:   '#e2e8f0',
-  inputText:     '#334155',
-  inputPlace:    '#cbd5e1',
-  rowBg:         '#f8fafc',
-  rowBorder:     '#f1f5f9',
-  rowText:       '#64748b',
-  rowDate:       '#cbd5e1',
-  starLabel:     '#d97706',
-  footerText:    '#cbd5e1',
-  checkBg:       '#dcfce7',
-  checkBorder:   '#86efac',
-  checkText:     '#16a34a',
-  calToday:      '#eff6ff',
-  calTodayBorder:'#bfdbfe',
-  calRow:        '#f8fafc',
-  calBorder:     '#f1f5f9',
-  settingsBg:    '#ffffff',
+  id:             'light' as ThemeId,
+  /* 페이지 */
+  pageBg:         'linear-gradient(160deg,#f0f7ff 0%,#e8f4fd 45%,#fef9ee 100%)',
+  bodyBg:         '#f0f7ff',
+  blob1:          'rgba(186,230,255,0.4)',
+  blob2:          'rgba(254,202,202,0.3)',
+  /* 카드 */
+  cardBg:         '#ffffff',
+  cardBorder:     '#e2e8f0',
+  /* 텍스트 */
+  textH:          '#1e293b',
+  textSub:        '#94a3b8',
+  textLabel:      '#64748b',
+  textBody:       '#475569',
+  /* 인풋 */
+  inputBg:        '#f8fafc',
+  inputBorder:    '#e2e8f0',
+  inputText:      '#334155',
+  inputPlace:     '#cbd5e1',
+  /* 리스트 행 */
+  rowBg:          '#f8fafc',
+  rowBorder:      '#e9eef5',
+  rowText:        '#64748b',
+  rowDate:        '#94a3b8',
+  /* 달력 */
+  calToday:       '#eff6ff',
+  calTodayBorder: '#93c5fd',
+  calCell:        '#f8fafc',
+  calCellBorder:  '#e9eef5',
+  calDash:        '#cbd5e1',
+  calScore:       '#d97706',
+  /* 기타 UI */
+  starLabel:      '#d97706',
+  footerText:     '#94a3b8',
+  checkBg:        '#f0fdf4',
+  checkBorder:    '#86efac',
+  checkText:      '#16a34a',
+  /* 버튼 */
+  saveBtn:        'linear-gradient(135deg,#004b8d,#1a6db5)',
+  saveShadow:     '0 4px 16px rgba(0,75,141,0.35)',
+  saveTxt:        '#ffffff',
+  savedBtn:       'linear-gradient(135deg,#22c55e,#16a34a)',
+  savedShadow:    '0 4px 16px rgba(34,197,94,0.35)',
+  savedTxt:       '#ffffff',
+  /* 설정 패널 */
+  settingsBg:     '#ffffff',
   settingsHBorder:'#f1f5f9',
-  setLevelBg:    (c: string) => c + '08',
-  setLevelBorder:(c: string) => c + '33',
-  recoverBorder: '#fde68a',
-  recoverBg:     '#fffbeb',
-  recoverListBg: '#f8fafc',
-  tabActive:     '#004b8d',
-  tabActiveTxt:  '#ffffff',
-  tabInactive:   'transparent',
-  tabInactiveTxt:'#64748b',
-  saveBtn:       'linear-gradient(135deg,#004b8d,#1a6db5)',
-  saveShadow:    '0 4px 20px #004b8d44',
-  savedBtn:      'linear-gradient(135deg,#22c55e,#16a34a)',
-  savedShadow:   '0 4px 20px #22c55e44',
-  settSaveBtn:   '#004b8d',
+  settingsInputBg:'#f8fafc',
+  tabActive:      '#004b8d',
+  tabActiveTxt:   '#ffffff',
+  tabInactiveTxt: '#64748b',
+  settSaveBtn:    '#004b8d',
+  settSaveTxt:    '#ffffff',
+  /* 레벨카드 설정 내 배경 */
+  setLevelBg:     (c: string) => c + '10',
+  setLevelBorder: (c: string) => c + '40',
+  /* 복구 탭 */
+  recoverBg:      '#fffbeb',
+  recoverBorder:  '#fde68a',
+  /* 토글 */
+  toggleBg:       '#f1f5f9',
+  toggleBorder:   '#e2e8f0',
+  toggleTxt:      '#475569',
+  toggleTrack:    '#cbd5e1',
+  toggleIcon:     '☀️',
+  toggleLabel:    '주간 모드',
 };
 
+/* ── 야간 테마 */
 const DARK = {
-  id: 'dark' as ThemeId,
-  pageBg:        '#0a1628',
-  blob1:         'rgba(0,75,141,0.22)',
-  blob2:         'rgba(139,0,0,0.18)',
-  bodyBg:        '#0a1628',
-  cardBg:        'rgba(13,31,61,0.88)',
-  cardBorder:    'rgba(255,255,255,0.1)',
-  textH:         '#f1f5f9',
-  textSub:       'rgba(255,255,255,0.32)',
-  textLabel:     'rgba(255,255,255,0.55)',
-  textBody:      'rgba(255,255,255,0.7)',
-  inputBg:       'rgba(255,255,255,0.07)',
-  inputBorder:   'rgba(255,255,255,0.15)',
-  inputText:     '#e2e8f0',
-  inputPlace:    'rgba(255,255,255,0.2)',
-  rowBg:         'rgba(255,255,255,0.05)',
-  rowBorder:     'rgba(255,255,255,0.06)',
-  rowText:       'rgba(255,255,255,0.5)',
-  rowDate:       'rgba(255,255,255,0.2)',
-  starLabel:     '#d4a017',
-  footerText:    'rgba(255,255,255,0.2)',
-  checkBg:       'rgba(34,197,94,0.15)',
-  checkBorder:   'rgba(34,197,94,0.3)',
-  checkText:     '#4ade80',
-  calToday:      'rgba(212,160,23,0.18)',
-  calTodayBorder:'rgba(212,160,23,0.45)',
-  calRow:        'rgba(255,255,255,0.05)',
-  calBorder:     'rgba(255,255,255,0.05)',
-  settingsBg:    '#0d1f3d',
-  settingsHBorder:'rgba(255,255,255,0.1)',
-  setLevelBg:    (c: string) => c + '12',
-  setLevelBorder:(c: string) => c + '40',
-  recoverBorder: 'rgba(212,160,23,0.35)',
-  recoverBg:     'rgba(212,160,23,0.08)',
-  recoverListBg: 'rgba(255,255,255,0.05)',
-  tabActive:     '#d4a017',
-  tabActiveTxt:  '#0a1628',
-  tabInactive:   'transparent',
-  tabInactiveTxt:'rgba(255,255,255,0.45)',
-  saveBtn:       'linear-gradient(135deg,#d4a017,#f9d423)',
-  saveShadow:    '0 4px 20px #d4a01744',
-  savedBtn:      'linear-gradient(135deg,#22c55e,#16a34a)',
-  savedShadow:   '0 4px 20px #22c55e44',
-  settSaveBtn:   '#d4a017',
+  id:             'dark' as ThemeId,
+  /* 페이지 */
+  pageBg:         '#0a1628',
+  bodyBg:         '#0a1628',
+  blob1:          'rgba(0,75,141,0.25)',
+  blob2:          'rgba(139,0,0,0.2)',
+  /* 카드 — 불투명 solid 색상 */
+  cardBg:         '#0f2044',
+  cardBorder:     'rgba(255,255,255,0.12)',
+  /* 텍스트 */
+  textH:          '#f1f5f9',
+  textSub:        'rgba(255,255,255,0.45)',
+  textLabel:      'rgba(255,255,255,0.6)',
+  textBody:       'rgba(255,255,255,0.75)',
+  /* 인풋 */
+  inputBg:        '#162035',
+  inputBorder:    'rgba(255,255,255,0.18)',
+  inputText:      '#e2e8f0',
+  inputPlace:     'rgba(255,255,255,0.3)',
+  /* 리스트 행 */
+  rowBg:          '#162035',
+  rowBorder:      'rgba(255,255,255,0.1)',
+  rowText:        'rgba(255,255,255,0.6)',
+  rowDate:        'rgba(255,255,255,0.35)',
+  /* 달력 */
+  calToday:       'rgba(212,160,23,0.22)',
+  calTodayBorder: 'rgba(212,160,23,0.5)',
+  calCell:        '#162035',
+  calCellBorder:  'rgba(255,255,255,0.08)',
+  calDash:        'rgba(255,255,255,0.2)',
+  calScore:       '#d4a017',
+  /* 기타 UI */
+  starLabel:      '#d4a017',
+  footerText:     'rgba(255,255,255,0.25)',
+  checkBg:        'rgba(34,197,94,0.15)',
+  checkBorder:    'rgba(34,197,94,0.35)',
+  checkText:      '#4ade80',
+  /* 버튼 */
+  saveBtn:        'linear-gradient(135deg,#d4a017,#f9d423)',
+  saveShadow:     '0 4px 16px rgba(212,160,23,0.35)',
+  saveTxt:        '#0a1628',
+  savedBtn:       'linear-gradient(135deg,#22c55e,#16a34a)',
+  savedShadow:    '0 4px 16px rgba(34,197,94,0.35)',
+  savedTxt:       '#ffffff',
+  /* 설정 패널 */
+  settingsBg:     '#0d1f3d',
+  settingsHBorder:'rgba(255,255,255,0.12)',
+  settingsInputBg:'#162035',
+  tabActive:      '#d4a017',
+  tabActiveTxt:   '#0a1628',
+  tabInactiveTxt: 'rgba(255,255,255,0.5)',
+  settSaveBtn:    '#d4a017',
+  settSaveTxt:    '#0a1628',
+  setLevelBg:     (c: string) => c + '18',
+  setLevelBorder: (c: string) => c + '50',
+  recoverBg:      'rgba(212,160,23,0.1)',
+  recoverBorder:  'rgba(212,160,23,0.4)',
+  /* 토글 */
+  toggleBg:       'rgba(255,255,255,0.1)',
+  toggleBorder:   'rgba(255,255,255,0.15)',
+  toggleTxt:      '#f1f5f9',
+  toggleTrack:    '#d4a017',
+  toggleIcon:     '🌙',
+  toggleLabel:    '야간 모드',
 };
 
 type Tokens = typeof LIGHT;
 const ThemeCtx = createContext<Tokens>(LIGHT);
-function useTheme() { return useContext(ThemeCtx); }
+const useTheme = () => useContext(ThemeCtx);
 
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════════════
    타입 & 데이터
-═══════════════════════════════════════ */
+══════════════════════════════════════════════ */
 type LevelConfig = {
   name: string; subtitle: string; schools: string[];
   min: number; max: number; color: string; emoji: string; logo: string;
@@ -141,12 +185,13 @@ const STAR_LABELS: Record<number, string> = {
   1: '매우 나쁨', 2: '나쁨', 3: '보통', 4: '좋음', 5: '최고!',
 };
 
+/* 레벨별 히어로 카드 그라데이션 (테마 무관) */
 const LEVEL_GRAD = [
-  { from: '#e2e8f0', to: '#94a3b8', text: '#1e293b' },
-  { from: '#d1fae5', to: '#6ee7b7', text: '#064e3b' },
-  { from: '#dbeafe', to: '#93c5fd', text: '#1e3a8a' },
-  { from: '#fef3c7', to: '#fcd34d', text: '#78350f' },
-  { from: '#ffe4e6', to: '#fca5a5', text: '#7f1d1d' },
+  { from: '#d1d5db', to: '#6b7280', text: '#1f2937' },   // Lv1 slate
+  { from: '#a7f3d0', to: '#34d399', text: '#064e3b' },   // Lv2 emerald
+  { from: '#bfdbfe', to: '#60a5fa', text: '#1e3a8a' },   // Lv3 blue
+  { from: '#fde68a', to: '#fbbf24', text: '#78350f' },   // Lv4 amber
+  { from: '#fecaca', to: '#f87171', text: '#7f1d1d' },   // Lv5 crimson
 ];
 
 function getTodayString() { return new Date().toISOString().slice(0, 10); }
@@ -154,47 +199,45 @@ function getLevel(s: number, ls: LevelConfig[]) {
   return ls.find((l) => s >= l.min && s <= l.max) ?? ls[0];
 }
 
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════════════
    로고 영역  240 × 240
-═══════════════════════════════════════ */
+══════════════════════════════════════════════ */
 function LevelLogoArea({ logo, levelIdx }: { logo: string; levelIdx: number }) {
   const [failed, setFailed] = useState(false);
   const grad = LEVEL_GRAD[levelIdx] ?? LEVEL_GRAD[0];
-
   if (!failed) return (
-    <div className="w-[240px] h-[240px] shrink-0 rounded-2xl overflow-hidden shadow-2xl ring-4 ring-white/60">
+    <div className="w-[240px] h-[240px] shrink-0 rounded-2xl overflow-hidden shadow-2xl ring-4 ring-white/50">
       <img src={logo} alt={`레벨 ${levelIdx + 1} 로고`}
-        className="w-full h-full object-cover"
-        onError={() => setFailed(true)} />
+        className="w-full h-full object-cover" onError={() => setFailed(true)} />
     </div>
   );
   return (
     <div className="w-[240px] h-[240px] shrink-0 flex flex-col items-center justify-center
-                    rounded-2xl border-2 border-dashed shadow-inner"
-      style={{ borderColor: grad.text + '40', background: grad.text + '08' }}>
-      <span className="text-5xl mb-3 opacity-30">🏛️</span>
-      <span className="text-sm font-medium opacity-40" style={{ color: grad.text }}>
+                    rounded-2xl border-2 border-dashed"
+      style={{ borderColor: grad.text + '40', background: grad.text + '10' }}>
+      <span className="text-5xl mb-2 opacity-25">🏛️</span>
+      <span className="text-sm font-medium" style={{ color: grad.text + '80' }}>
         level{levelIdx + 1}.png
       </span>
     </div>
   );
 }
 
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════════════
    별점 선택
-═══════════════════════════════════════ */
+══════════════════════════════════════════════ */
 function StarPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   const th = useTheme();
   const [hov, setHov] = useState(0);
   const d = hov || value;
   return (
-    <div className="space-y-3">
-      <div className="flex gap-3 justify-center">
+    <div className="space-y-2">
+      <div className="flex gap-2 justify-center">
         {[1,2,3,4,5].map((n) => (
           <button key={n} onClick={() => onChange(n)}
             onMouseEnter={() => setHov(n)} onMouseLeave={() => setHov(0)}
-            className="text-5xl transition-all duration-100 active:scale-90 hover:scale-115"
-            style={{ filter: n <= d ? 'drop-shadow(0 2px 8px #f59e0b)' : 'grayscale(1) opacity(0.25)' }}>
+            className="text-4xl transition-all duration-100 active:scale-90 hover:scale-115"
+            style={{ filter: n <= d ? 'drop-shadow(0 2px 6px #f59e0b)' : 'grayscale(1) opacity(0.3)' }}>
             ⭐
           </button>
         ))}
@@ -206,40 +249,9 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
   );
 }
 
-/* ═══════════════════════════════════════
-   테마 토글 버튼
-═══════════════════════════════════════ */
-function ThemeToggle({ theme, onToggle }: { theme: ThemeId; onToggle: () => void }) {
-  const isDark = theme === 'dark';
-  return (
-    <button
-      onClick={onToggle}
-      aria-label="테마 전환"
-      className="relative flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm
-                 transition-all active:scale-95 border"
-      style={{
-        background: isDark ? 'rgba(255,255,255,0.1)' : '#f1f5f9',
-        borderColor: isDark ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
-        color: isDark ? '#f1f5f9' : '#475569',
-      }}
-    >
-      <span className="text-lg leading-none">{isDark ? '🌙' : '☀️'}</span>
-      <span>{isDark ? '야간 모드' : '주간 모드'}</span>
-      {/* 슬라이더 */}
-      <span
-        className="w-10 h-5 rounded-full flex items-center transition-all duration-300 ml-1"
-        style={{ background: isDark ? '#d4a017' : '#cbd5e1' }}>
-        <span
-          className="w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300"
-          style={{ transform: isDark ? 'translateX(22px)' : 'translateX(2px)' }} />
-      </span>
-    </button>
-  );
-}
-
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════════════
    설정 패널
-═══════════════════════════════════════ */
+══════════════════════════════════════════════ */
 function SettingsPanel({ levels, records, totalScore, theme, onSave, onAddRecord, onThemeChange, onClose }: {
   levels: LevelConfig[]; records: DayRecord[]; totalScore: number;
   theme: ThemeId;
@@ -257,12 +269,12 @@ function SettingsPanel({ levels, records, totalScore, theme, onSave, onAddRecord
   const [recMsg,  setRecMsg]    = useState('');
 
   const upSchools = (i: number, raw: string) =>
-    setDraft((p) => p.map((l, j) => j===i ? {...l, schools: raw.split(',').map(s=>s.trim()).filter(Boolean)} : l));
+    setDraft((p) => p.map((l, j) => j===i ? { ...l, schools: raw.split(',').map(s => s.trim()).filter(Boolean) } : l));
   const upField = (i: number, f: 'name'|'subtitle', v: string) =>
-    setDraft((p) => p.map((l, j) => j===i ? {...l,[f]:v} : l));
+    setDraft((p) => p.map((l, j) => j===i ? { ...l, [f]: v } : l));
   const handleReset = () => {
     if (confirm('기본값으로 초기화할까요?'))
-      setDraft(DEFAULT_LEVELS.map((l) => ({...l, schools:[...l.schools]})));
+      setDraft(DEFAULT_LEVELS.map((l) => ({ ...l, schools: [...l.schools] })));
   };
   const handleAdd = () => {
     if (!recDate) return;
@@ -272,49 +284,62 @@ function SettingsPanel({ levels, records, totalScore, theme, onSave, onAddRecord
     setRecNote('');
   };
 
-  const inputCls = 'w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 border';
+  const iBase = {
+    background: th.settingsInputBg, borderColor: th.inputBorder,
+    color: th.inputText, borderWidth: '1px', borderStyle: 'solid',
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3"
-      style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}>
-      <div className="rounded-3xl w-full max-w-[740px] max-h-[90vh] flex flex-col shadow-2xl border"
-        style={{ background: th.settingsBg, borderColor: th.settingsHBorder }}>
+      style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(6px)' }}>
+      <div className="rounded-3xl w-full max-w-[740px] max-h-[90vh] flex flex-col shadow-2xl"
+        style={{
+          background: th.settingsBg,
+          border: `1px solid ${th.settingsHBorder}`,
+          ['--placeholder-color' as string]: th.inputPlace,
+        }}>
 
         {/* 헤더 */}
-        <div className="flex items-center justify-between px-6 py-4 border-b"
-          style={{ borderColor: th.settingsHBorder }}>
+        <div className="flex items-center justify-between px-6 py-4"
+          style={{ borderBottom: `1px solid ${th.settingsHBorder}` }}>
           <div className="flex gap-2">
             {(['levels','recovery'] as const).map((t) => (
               <button key={t} onClick={() => setTab(t)}
                 className="px-4 py-2 rounded-xl font-bold text-sm transition-all"
                 style={{
-                  background: tab===t ? th.tabActive : th.tabInactive,
+                  background: tab===t ? th.tabActive : 'transparent',
                   color: tab===t ? th.tabActiveTxt : th.tabInactiveTxt,
                 }}>
                 {t==='levels' ? '🏫 레벨 설정' : '🔧 점수 복구'}
               </button>
             ))}
           </div>
-          <div className="flex gap-2 items-center">
-            {/* 테마 전환 */}
-            <ThemeToggle theme={theme} onToggle={onThemeChange} />
+          <div className="flex items-center gap-2">
+            {/* 테마 토글 */}
+            <button onClick={onThemeChange}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold transition-all border"
+              style={{
+                background: th.toggleBg, borderColor: th.toggleBorder, color: th.toggleTxt,
+              }}>
+              <span className="text-base">{th.toggleIcon}</span>
+              <span>{th.toggleLabel}</span>
+              <span className="w-9 h-5 rounded-full flex items-center ml-1 transition-colors duration-300"
+                style={{ background: th.toggleTrack }}>
+                <span className="w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300 block"
+                  style={{ transform: theme === 'dark' ? 'translateX(18px)' : 'translateX(2px)' }} />
+              </span>
+            </button>
             {tab==='levels' && (
               <>
                 <button onClick={handleReset}
-                  className="text-sm px-3 py-2 rounded-xl transition-colors"
-                  style={{ color: th.textSub }}>
-                  기본값 복원
-                </button>
+                  className="text-sm px-3 py-2 rounded-xl"
+                  style={{ color: th.textSub }}>기본값 복원</button>
                 <button onClick={() => onSave(draft)}
-                  className="text-sm font-bold text-white px-4 py-2 rounded-xl hover:brightness-110"
-                  style={{ background: th.settSaveBtn }}>
-                  저장
-                </button>
+                  className="text-sm font-bold px-4 py-2 rounded-xl"
+                  style={{ background: th.settSaveBtn, color: th.settSaveTxt }}>저장</button>
               </>
             )}
-            <button onClick={onClose}
-              className="text-2xl leading-none px-2 transition-colors"
-              style={{ color: th.textSub }}>✕</button>
+            <button onClick={onClose} className="text-xl px-2" style={{ color: th.textSub }}>✕</button>
           </div>
         </div>
 
@@ -322,20 +347,20 @@ function SettingsPanel({ levels, records, totalScore, theme, onSave, onAddRecord
         {tab==='levels' && (
           <div className="overflow-y-auto px-6 py-5 space-y-4">
             {draft.map((lv, i) => (
-              <div key={i} className="rounded-2xl p-5 border"
+              <div key={i} className="rounded-2xl p-4 border"
                 style={{ background: th.setLevelBg(lv.color), borderColor: th.setLevelBorder(lv.color) }}>
-                <div className="flex items-center justify-between gap-3 mb-4">
+                <div className="flex items-center justify-between gap-3 mb-3">
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">{lv.emoji}</span>
-                    <div className="text-xs font-bold text-white px-3 py-1 rounded-full"
+                    <span className="text-xl">{lv.emoji}</span>
+                    <span className="text-xs font-bold text-white px-3 py-1 rounded-full"
                       style={{ background: lv.color }}>
                       Lv.{i+1} · {lv.min}~{lv.max}점
-                    </div>
+                    </span>
                   </div>
-                  <div className="w-12 h-12 shrink-0 rounded-xl overflow-hidden border"
-                    style={{ borderColor: lv.color + '44' }}>
+                  <div className="w-11 h-11 rounded-xl overflow-hidden border shrink-0"
+                    style={{ borderColor: lv.color + '55' }}>
                     <img src={lv.logo} alt="" className="w-full h-full object-contain p-1"
-                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity='0'; }} />
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }} />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3 mb-3">
@@ -344,9 +369,8 @@ function SettingsPanel({ levels, records, totalScore, theme, onSave, onAddRecord
                       <label className="text-xs mb-1 block" style={{ color: th.textLabel }}>
                         {f==='name' ? '레벨 이름' : '부제목'}
                       </label>
-                      <input className={inputCls}
-                        style={{ background: th.inputBg, borderColor: th.inputBorder, color: th.inputText }}
-                        value={lv[f]} onChange={(e) => upField(i, f, e.target.value)} />
+                      <input className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        style={iBase} value={lv[f]} onChange={(e) => upField(i, f, e.target.value)} />
                     </div>
                   ))}
                 </div>
@@ -354,9 +378,8 @@ function SettingsPanel({ levels, records, totalScore, theme, onSave, onAddRecord
                   <label className="text-xs mb-1 block" style={{ color: th.textLabel }}>
                     대학 목록 <span style={{ color: th.textSub }}>(쉼표 구분)</span>
                   </label>
-                  <input className={inputCls}
-                    style={{ background: th.inputBg, borderColor: th.inputBorder, color: th.inputText }}
-                    value={lv.schools.join(', ')} onChange={(e) => upSchools(i, e.target.value)} />
+                  <input className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    style={iBase} value={lv.schools.join(', ')} onChange={(e) => upSchools(i, e.target.value)} />
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     {lv.schools.map((s) => (
                       <span key={s} className="text-xs px-2 py-0.5 rounded-full text-white"
@@ -372,7 +395,7 @@ function SettingsPanel({ levels, records, totalScore, theme, onSave, onAddRecord
         {/* 탭: 점수 복구 */}
         {tab==='recovery' && (
           <div className="overflow-y-auto px-6 py-5 space-y-4">
-            <div className="rounded-2xl p-5 flex items-center gap-4 border"
+            <div className="rounded-2xl p-4 flex items-center gap-4 border"
               style={{ background: th.rowBg, borderColor: th.rowBorder }}>
               <div className="text-5xl font-black" style={{ color: th.tabActive }}>{totalScore}</div>
               <div>
@@ -383,23 +406,24 @@ function SettingsPanel({ levels, records, totalScore, theme, onSave, onAddRecord
             <div className="rounded-2xl p-5 border"
               style={{ background: th.recoverBg, borderColor: th.recoverBorder }}>
               <h3 className="font-bold text-lg mb-1" style={{ color: th.textH }}>📅 날짜별 점수 추가</h3>
-              <p className="text-sm mb-5" style={{ color: th.textSub }}>기록이 사라진 날짜의 점수를 직접 입력해 복구하세요.</p>
+              <p className="text-sm mb-4" style={{ color: th.textSub }}>
+                기록이 사라진 날짜의 점수를 직접 입력해 복구하세요.
+              </p>
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="text-xs mb-1 block font-medium" style={{ color: th.textLabel }}>날짜 선택</label>
                   <input type="date"
-                    className="w-full rounded-xl px-4 py-3 text-base border focus:outline-none focus:ring-2 focus:ring-amber-400"
-                    style={{ background: th.inputBg, borderColor: th.inputBorder, color: th.inputText }}
-                    value={recDate} max={getTodayString()}
+                    className="w-full rounded-xl px-4 py-2.5 text-sm border focus:outline-none focus:ring-2 focus:ring-amber-400"
+                    style={iBase} value={recDate} max={getTodayString()}
                     onChange={(e) => { setRecDate(e.target.value); setRecMsg(''); }} />
                 </div>
                 <div>
                   <label className="text-xs mb-1 block font-medium" style={{ color: th.textLabel }}>별점</label>
-                  <div className="flex gap-2 items-center h-[46px]">
+                  <div className="flex gap-2 items-center h-[42px]">
                     {[1,2,3,4,5].map((n) => (
                       <button key={n} onClick={() => setRecScore(n)}
-                        className="text-3xl transition-transform hover:scale-110 active:scale-90"
-                        style={{ filter: n<=recScore ? 'drop-shadow(0 0 4px #f59e0b)' : 'grayscale(1) opacity(0.25)' }}>
+                        className="text-2xl transition-transform hover:scale-110 active:scale-90"
+                        style={{ filter: n<=recScore ? 'drop-shadow(0 0 4px #f59e0b)' : 'grayscale(1) opacity(0.3)' }}>
                         ⭐
                       </button>
                     ))}
@@ -409,16 +433,16 @@ function SettingsPanel({ levels, records, totalScore, theme, onSave, onAddRecord
               </div>
               <div className="mb-4">
                 <label className="text-xs mb-1 block font-medium" style={{ color: th.textLabel }}>메모 (선택)</label>
-                <input className="w-full rounded-xl px-4 py-3 text-sm border focus:outline-none focus:ring-2 focus:ring-amber-400"
-                  style={{ background: th.inputBg, borderColor: th.inputBorder, color: th.inputText }}
-                  placeholder="예: 복구된 기록" value={recNote} onChange={(e) => setRecNote(e.target.value)} />
+                <input className="w-full rounded-xl px-4 py-2.5 text-sm border focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  style={iBase} placeholder="예: 복구된 기록" value={recNote}
+                  onChange={(e) => setRecNote(e.target.value)} />
               </div>
               <button onClick={handleAdd}
-                className="w-full py-3 rounded-xl font-bold text-white text-base active:scale-95 transition-all bg-amber-500 hover:bg-amber-600">
+                className="w-full py-3 rounded-xl font-bold text-white text-sm active:scale-95 transition-all bg-amber-500 hover:bg-amber-600">
                 이 날짜 점수 추가
               </button>
               {recMsg && (
-                <p className="mt-3 text-sm text-center font-medium rounded-xl py-2 px-4 border"
+                <p className="mt-3 text-xs text-center font-medium rounded-xl py-2 px-4 border"
                   style={{ color: th.textBody, background: th.rowBg, borderColor: th.rowBorder }}>
                   {recMsg}
                 </p>
@@ -426,12 +450,14 @@ function SettingsPanel({ levels, records, totalScore, theme, onSave, onAddRecord
             </div>
             {records.length > 0 && (
               <div>
-                <h3 className="font-semibold text-sm mb-3" style={{ color: th.textSub }}>저장된 기록 ({records.length}개)</h3>
+                <h3 className="text-sm font-semibold mb-3" style={{ color: th.textSub }}>
+                  저장된 기록 ({records.length}개)
+                </h3>
                 <ul className="space-y-1.5 max-h-44 overflow-y-auto">
                   {[...records].sort((a,b) => b.date.localeCompare(a.date)).map((r) => (
                     <li key={r.date} className="flex items-center gap-3 rounded-xl px-4 py-2.5 border"
                       style={{ background: th.rowBg, borderColor: th.rowBorder }}>
-                      <span className="text-sm w-24 shrink-0" style={{ color: th.rowDate }}>{r.date}</span>
+                      <span className="text-xs w-24 shrink-0" style={{ color: th.rowDate }}>{r.date}</span>
                       <div className="flex">
                         {[1,2,3,4,5].map((n) => (
                           <span key={n} className="text-sm"
@@ -451,47 +477,45 @@ function SettingsPanel({ levels, records, totalScore, theme, onSave, onAddRecord
   );
 }
 
-/* ═══════════════════════════════════════
-   수능 카운트다운
-═══════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   수능 카운트다운  (테마 무관 — 항상 컬러풀)
+══════════════════════════════════════════════ */
 const SUNEUNG_DATE = new Date('2027-11-18T00:00:00');
 
 function CountdownBanner() {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => { const id = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(id); }, []);
-
-  const diffMs = SUNEUNG_DATE.getTime() - now.getTime();
-  if (diffMs <= 0) return (
-    <div className="w-full rounded-3xl bg-gradient-to-r from-yellow-400 to-orange-400 p-5 mb-5 text-center shadow-lg">
+  const diff = SUNEUNG_DATE.getTime() - now.getTime();
+  if (diff <= 0) return (
+    <div className="w-full rounded-2xl bg-gradient-to-r from-yellow-400 to-orange-400 p-5 mb-5 text-center shadow-lg">
       <p className="text-2xl font-bold text-white">🎉 수능 당일! 최선을 다하세요!</p>
     </div>
   );
-
-  const ts   = Math.floor(diffMs / 1000);
+  const ts = Math.floor(diff / 1000);
   const days = Math.floor(ts / 86400);
   const hrs  = Math.floor((ts % 86400) / 3600);
   const mins = Math.floor((ts % 3600) / 60);
   const secs = ts % 60;
 
   return (
-    <div className="w-full rounded-2xl mb-5 overflow-hidden shadow-xl relative"
-      style={{ background: 'linear-gradient(135deg,#004b8d 0%,#1a6db5 50%,#9b1b1b 100%)' }}>
-      <div className="absolute inset-0 opacity-10"
-        style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
-      <div className="relative flex items-center justify-between gap-4 p-5">
+    <div className="w-full rounded-2xl mb-5 overflow-hidden shadow-lg relative"
+      style={{ background: 'linear-gradient(135deg,#004b8d 0%,#1565c0 55%,#9b1b1b 100%)' }}>
+      <div className="absolute inset-0 opacity-[0.08] pointer-events-none"
+        style={{ backgroundImage: 'radial-gradient(circle,white 1px,transparent 1px)', backgroundSize: '28px 28px' }} />
+      <div className="relative flex items-center justify-between gap-3 px-6 py-4">
         <div>
           <p className="text-white/60 text-[10px] font-bold tracking-widest uppercase mb-1">2027 CSAT Countdown</p>
-          <p className="text-white text-base font-bold leading-tight">2027년 11월 18일(목)</p>
-          <p className="text-yellow-200 text-xs font-semibold mt-0.5">합격의 그날까지, 매일 한 걸음 🎯</p>
+          <p className="text-white text-base font-bold">2027년 11월 18일(목)</p>
+          <p className="text-yellow-200 text-xs font-medium mt-0.5">합격의 그날까지, 매일 한 걸음 🎯</p>
         </div>
-        <div className="flex gap-2 text-center">
-          {[['DAYS',days],['HRS',hrs],['MIN',mins],['SEC',secs]].map(([label, value]) => (
+        <div className="flex gap-2">
+          {[['DAYS',days],['HRS',hrs],['MIN',mins],['SEC',secs]].map(([label, val]) => (
             <div key={label as string}
-              className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl px-3 py-2.5 min-w-[54px]">
-              <p className="text-2xl font-black text-white tabular-nums leading-none tick-anim">
-                {String(value).padStart(2, '0')}
-              </p>
-              <p className="text-white/60 text-[10px] mt-1 tracking-widest">{label}</p>
+              className="flex flex-col items-center bg-black/25 border border-white/25 rounded-xl px-3 py-2 min-w-[50px]">
+              <span className="text-2xl font-black text-white tabular-nums leading-none tick-anim">
+                {String(val).padStart(2,'0')}
+              </span>
+              <span className="text-[10px] text-white/55 mt-1 tracking-wider">{label}</span>
             </div>
           ))}
         </div>
@@ -500,9 +524,9 @@ function CountdownBanner() {
   );
 }
 
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════════════
    메인 앱
-═══════════════════════════════════════ */
+══════════════════════════════════════════════ */
 export default function App() {
   const [records, setRecords] = useState<DayRecord[]>(() => {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]'); } catch { return []; }
@@ -522,10 +546,9 @@ export default function App() {
   const [themeId, setThemeId] = useState<ThemeId>(() =>
     (localStorage.getItem(THEME_KEY) as ThemeId) ?? 'light'
   );
-
-  const [score, setScore]               = useState(3);
-  const [note, setNote]                 = useState('');
-  const [saved, setSaved]               = useState(false);
+  const [score, setScore]     = useState(3);
+  const [note, setNote]       = useState('');
+  const [saved, setSaved]     = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
   const th       = themeId === 'dark' ? DARK : LIGHT;
@@ -533,8 +556,8 @@ export default function App() {
   const todayRec = records.find((r) => r.date === today);
   const total    = Math.min(100, records.reduce((s, r) => s + r.score, 0));
   const level    = getLevel(total, levels);
-  const levelIdx = levels.indexOf(level);
-  const grad     = LEVEL_GRAD[levelIdx] ?? LEVEL_GRAD[0];
+  const lvIdx    = levels.indexOf(level);
+  const grad     = LEVEL_GRAD[lvIdx] ?? LEVEL_GRAD[0];
 
   useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); }, [records]);
   useEffect(() => { localStorage.setItem(LEVELS_KEY,  JSON.stringify(levels));  }, [levels]);
@@ -543,7 +566,7 @@ export default function App() {
     document.body.style.background = th.bodyBg;
   }, [themeId, th.bodyBg]);
 
-  const handleSave = () => {
+  const handleSave       = () => {
     if (todayRec) return;
     setRecords((p) => [...p, { date: today, score, note }]);
     setSaved(true); setTimeout(() => setSaved(false), 2000);
@@ -553,29 +576,38 @@ export default function App() {
   const handleAddRecord  = (r: DayRecord) => setRecords((p) => [...p, r]);
   const handleToggleTheme = () => setThemeId((t) => t === 'light' ? 'dark' : 'light');
   const handleExport = () => {
-    const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), records }, null, 2)], { type:'application/json' });
-    const url = URL.createObjectURL(blob); const a = document.createElement('a');
-    a.href = url; a.download = `univer-records-${today}.json`; a.click(); URL.revokeObjectURL(url);
+    const blob = new Blob(
+      [JSON.stringify({ exportedAt: new Date().toISOString(), records }, null, 2)],
+      { type: 'application/json' }
+    );
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `univer-records-${today}.json`; a.click();
+    URL.revokeObjectURL(url);
   };
 
-  const last7Days = Array.from({ length: 7 }, (_, i) => {
+  const last7 = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(); d.setDate(d.getDate() - (6 - i)); return d.toISOString().slice(0, 10);
   });
   const DAY_KO = ['일','월','화','수','목','금','토'];
 
   return (
     <ThemeCtx.Provider value={th}>
-      <div className="min-h-screen relative flex flex-col items-center px-4 py-6 overflow-x-hidden transition-colors duration-300"
-        style={{ background: th.pageBg }}>
+      {/* CSS 변수: placeholder 색상 */}
+      <style>{`:root { --placeholder-color: ${th.inputPlace}; }`}</style>
+
+      <div className="min-h-screen relative flex flex-col items-center px-4 py-6 overflow-x-hidden"
+        style={{ background: th.pageBg, transition: 'background 0.3s' }}>
 
         {/* 배경 블롭 */}
-        <div className="fixed top-[-80px] left-[-80px] w-[500px] h-[500px] rounded-full blur-[80px] pointer-events-none transition-colors duration-500"
-          style={{ background: th.blob1 }} />
-        <div className="fixed bottom-[-100px] right-[-60px] w-[400px] h-[400px] rounded-full blur-[80px] pointer-events-none transition-colors duration-500"
-          style={{ background: th.blob2 }} />
+        <div className="fixed top-[-80px] left-[-80px] w-[500px] h-[500px] rounded-full blur-[100px] pointer-events-none"
+          style={{ background: th.blob1, transition: 'background 0.4s' }} />
+        <div className="fixed bottom-[-100px] right-[-60px] w-[400px] h-[400px] rounded-full blur-[100px] pointer-events-none"
+          style={{ background: th.blob2, transition: 'background 0.4s' }} />
 
         {showSettings && (
-          <SettingsPanel levels={levels} records={records} totalScore={total}
+          <SettingsPanel
+            levels={levels} records={records} totalScore={total}
             theme={themeId}
             onSave={handleSaveLevels} onAddRecord={handleAddRecord}
             onThemeChange={handleToggleTheme}
@@ -587,95 +619,97 @@ export default function App() {
           {/* ── 헤더 */}
           <div className="flex items-center justify-between mb-5">
             <div>
-              <div className="flex items-center gap-2.5 mb-1">
+              <div className="flex items-center gap-2 mb-1">
                 <span className="text-2xl">🎓</span>
-                <h1 className="text-2xl font-black tracking-tight" style={{ color: th.textH }}>대학 레벨업</h1>
+                <h1 className="text-2xl font-black tracking-tight" style={{ color: th.textH }}>
+                  대학 레벨업
+                </h1>
               </div>
-              <p className="text-xs pl-1" style={{ color: th.textSub }}>고려대 식품공학과까지, 오늘도 캠퍼스를 향해</p>
+              <p className="text-xs pl-1" style={{ color: th.textSub }}>
+                고려대 식품공학과까지, 오늘도 캠퍼스를 향해
+              </p>
             </div>
-            <div className="flex gap-2 items-center">
-              {/* 헤더 테마 토글 (빠른 전환용) */}
+            <div className="flex items-center gap-2">
+              {/* 빠른 테마 전환 */}
               <button onClick={handleToggleTheme}
-                aria-label="테마 전환"
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-xl
-                           transition-all active:scale-90 border"
-                style={{
-                  background: th.inputBg,
-                  borderColor: th.inputBorder,
-                  color: th.textH,
-                }}>
-                {themeId === 'dark' ? '🌙' : '☀️'}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-lg border transition-all active:scale-90"
+                style={{ background: th.cardBg, borderColor: th.cardBorder, color: th.textH }}
+                title={themeId === 'light' ? '야간 모드로 전환' : '주간 모드로 전환'}>
+                {th.toggleIcon}
               </button>
               <button onClick={() => setShowSettings(true)}
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-semibold text-sm
-                           border transition-all active:scale-95"
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-semibold text-sm border transition-all active:scale-95"
                 style={{ background: th.cardBg, borderColor: th.cardBorder, color: th.textBody }}>
                 ⚙️ 설정
               </button>
             </div>
           </div>
 
-          {/* ── 수능 카운트다운 */}
+          {/* ── 카운트다운 */}
           <CountdownBanner />
 
           {/* ── 레벨 히어로 카드 */}
-          <div className="w-full rounded-[24px] mb-5 overflow-hidden shadow-xl"
-            style={{ background: `linear-gradient(135deg, ${grad.from} 0%, ${grad.to} 100%)` }}>
-            <div className="h-1.5 w-full" style={{ background: level.color }} />
-            <div className="absolute inset-0 opacity-[0.07] pointer-events-none"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000' fill-opacity='1'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-              }} />
-            <div className="relative p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-[11px] font-black tracking-[0.18em] uppercase"
-                  style={{ color: grad.text + 'aa' }}>Current Level</span>
-                <div className="h-px flex-1 opacity-20" style={{ background: grad.text }} />
-                <span className="text-xs font-black px-3 py-1 rounded-full border"
-                  style={{ color: grad.text, borderColor: grad.text + '40', background: grad.text + '15' }}>
-                  {levelIdx + 1} / {levels.length}
+          <div className="w-full rounded-3xl mb-5 overflow-hidden shadow-xl relative"
+            style={{ background: `linear-gradient(135deg,${grad.from} 0%,${grad.to} 100%)` }}>
+            {/* 상단 컬러 라인 */}
+            <div className="h-1.5" style={{ background: level.color }} />
+            {/* 레벨 번호 뱃지 + 콘텐츠 */}
+            <div className="p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-[11px] font-black tracking-[0.18em] uppercase opacity-60"
+                  style={{ color: grad.text }}>Current Level</span>
+                <div className="h-px flex-1 opacity-15" style={{ background: grad.text }} />
+                <span className="text-xs font-black px-3 py-1 rounded-full"
+                  style={{ color: grad.text, background: grad.text + '18', border: `1px solid ${grad.text}30` }}>
+                  {lvIdx + 1} / {levels.length}
                 </span>
               </div>
-              <div className="flex items-center gap-6">
+
+              <div className="flex items-center gap-5">
+                {/* 텍스트 영역 */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold tracking-widest uppercase mb-1.5"
-                    style={{ color: grad.text + 'bb' }}>{level.emoji} {level.subtitle}</p>
-                  <h2 className="text-4xl font-black leading-none mb-3 tracking-tight" style={{ color: grad.text }}>
+                  <p className="text-xs font-bold tracking-widest uppercase mb-1.5 opacity-70"
+                    style={{ color: grad.text }}>
+                    {level.emoji} {level.subtitle}
+                  </p>
+                  <h2 className="text-4xl font-black leading-none mb-3 tracking-tight"
+                    style={{ color: grad.text }}>
                     {level.name}
                   </h2>
                   <div className="flex flex-wrap gap-1.5 mb-5">
                     {level.schools.map((s) => (
                       <span key={s} className="text-xs font-semibold rounded-full px-2.5 py-1"
-                        style={{ color: grad.text, background: grad.text + '18', border: `1px solid ${grad.text}30` }}>
+                        style={{ color: grad.text, background: grad.text + '18', border: `1px solid ${grad.text}28` }}>
                         {s}
                       </span>
                     ))}
                   </div>
+                  {/* 진행 바 */}
                   <div>
-                    <div className="flex justify-between text-xs mb-1.5 font-medium"
-                      style={{ color: grad.text + '88' }}>
-                      <span>진행도</span>
+                    <div className="flex justify-between text-xs mb-1.5" style={{ color: grad.text + '99' }}>
+                      <span className="font-medium">진행도</span>
                       <span className="font-black" style={{ color: grad.text }}>
-                        {total}<span className="font-normal opacity-60"> / 100점</span>
+                        {total} <span className="font-normal opacity-60">/ 100점</span>
                       </span>
                     </div>
-                    <div className="h-3 rounded-full overflow-hidden border"
-                      style={{ background: grad.text + '18', borderColor: grad.text + '25' }}>
+                    <div className="h-3 rounded-full overflow-hidden"
+                      style={{ background: grad.text + '20', border: `1px solid ${grad.text}22` }}>
                       <div className="h-full rounded-full transition-all duration-700"
                         style={{
                           width: `${total}%`,
-                          background: `linear-gradient(90deg, ${level.color}cc, ${level.color})`,
-                          boxShadow: `0 0 10px ${level.color}80`,
+                          background: `linear-gradient(90deg,${level.color}bb,${level.color})`,
+                          boxShadow: `0 0 8px ${level.color}80`,
                         }} />
                     </div>
-                    <div className="flex justify-between mt-1 px-0.5" style={{ color: grad.text + '50' }}>
+                    <div className="flex justify-between mt-1" style={{ color: grad.text + '55' }}>
                       {levels.map((l) => <span key={l.min} className="text-[10px]">{l.min}</span>)}
                       <span className="text-[10px]">100</span>
                     </div>
                   </div>
                 </div>
+                {/* 로고 */}
                 <div className="shrink-0">
-                  <LevelLogoArea logo={level.logo} levelIdx={levelIdx} />
+                  <LevelLogoArea logo={level.logo} levelIdx={lvIdx} />
                 </div>
               </div>
             </div>
@@ -685,8 +719,8 @@ export default function App() {
           <div className="grid grid-cols-2 gap-4">
 
             {/* 오늘의 만족도 */}
-            <div className="rounded-2xl p-5 border shadow-lg transition-colors duration-300"
-              style={{ background: th.cardBg, borderColor: th.cardBorder }}>
+            <div className="rounded-2xl p-5 border shadow-md"
+              style={{ background: th.cardBg, borderColor: th.cardBorder, transition: 'background 0.3s, border-color 0.3s' }}>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-lg">✏️</span>
                 <h2 className="font-black text-lg" style={{ color: th.textH }}>오늘의 만족도</h2>
@@ -694,14 +728,14 @@ export default function App() {
               <p className="text-xs mb-4 pl-7" style={{ color: th.textSub }}>{today}</p>
 
               {todayRec ? (
-                <div className="flex flex-col items-center justify-center py-5 gap-3">
-                  <div className="w-14 h-14 rounded-full border-2 flex items-center justify-center text-2xl shadow-sm"
+                <div className="flex flex-col items-center py-5 gap-3">
+                  <div className="w-14 h-14 rounded-full border-2 flex items-center justify-center text-2xl"
                     style={{ background: th.checkBg, borderColor: th.checkBorder }}>✅</div>
                   <p className="font-bold text-base" style={{ color: th.checkText }}>오늘 기록 완료!</p>
                   <div className="flex gap-1">
                     {[1,2,3,4,5].map((n) => (
                       <span key={n} className="text-2xl"
-                        style={{ filter: n<=todayRec.score ? 'drop-shadow(0 0 4px #f59e0b)' : 'grayscale(1) opacity(0.25)' }}>
+                        style={{ filter: n<=todayRec.score ? 'drop-shadow(0 0 4px #f59e0b)' : 'grayscale(1) opacity(0.2)' }}>
                         ⭐
                       </span>
                     ))}
@@ -714,21 +748,22 @@ export default function App() {
                 <>
                   <StarPicker value={score} onChange={setScore} />
                   <textarea
-                    className="w-full rounded-xl p-3 text-sm resize-none mt-4 border focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    className="w-full rounded-xl p-3 text-sm resize-none mt-4 border focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    rows={3}
+                    placeholder="오늘 하루 한 마디 (선택)"
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
                     style={{
                       background: th.inputBg, borderColor: th.inputBorder,
                       color: th.inputText,
                     }}
-                    rows={3}
-                    placeholder="오늘 하루 한 마디 (선택)"
-                    value={note} onChange={(e) => setNote(e.target.value)}
                   />
                   <button onClick={handleSave}
-                    className="mt-3 w-full py-3.5 rounded-xl font-black text-base active:scale-95 transition-all"
+                    className="mt-3 w-full py-3.5 rounded-xl font-black text-base transition-all active:scale-95"
                     style={{
                       background: saved ? th.savedBtn : th.saveBtn,
                       boxShadow: saved ? th.savedShadow : th.saveShadow,
-                      color: themeId === 'dark' && !saved ? '#0a1628' : '#ffffff',
+                      color: saved ? th.savedTxt : th.saveTxt,
                     }}>
                     {saved ? '✓ 저장됨!' : '오늘 기록 저장'}
                   </button>
@@ -737,40 +772,40 @@ export default function App() {
             </div>
 
             {/* 이번 주 기록 */}
-            <div className="rounded-2xl p-5 border shadow-lg flex flex-col transition-colors duration-300"
-              style={{ background: th.cardBg, borderColor: th.cardBorder }}>
-              <div className="flex justify-between items-start mb-4">
+            <div className="rounded-2xl p-5 border shadow-md flex flex-col"
+              style={{ background: th.cardBg, borderColor: th.cardBorder, transition: 'background 0.3s, border-color 0.3s' }}>
+              <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">📅</span>
                   <div>
                     <h2 className="font-black text-lg" style={{ color: th.textH }}>이번 주 기록</h2>
-                    <p className="text-xs mt-0.5" style={{ color: th.textSub }}>최근 7일</p>
+                    <p className="text-xs" style={{ color: th.textSub }}>최근 7일</p>
                   </div>
                 </div>
-                <div className="flex gap-1.5">
+                <div className="flex gap-1">
                   <button onClick={handleExport}
-                    className="text-xs py-1.5 px-2.5 rounded-xl font-semibold transition-colors"
+                    className="text-xs px-2.5 py-1.5 rounded-xl font-semibold transition-colors"
                     style={{ color: '#3b82f6' }}>💾</button>
                   <button onClick={handleReset}
-                    className="text-xs py-1.5 px-2.5 rounded-xl transition-colors"
+                    className="text-xs px-2.5 py-1.5 rounded-xl transition-colors"
                     style={{ color: '#f87171' }}>초기화</button>
                 </div>
               </div>
 
               {/* 7일 달력 */}
-              <div className="grid grid-cols-7 gap-1 mb-4">
-                {last7Days.map((date) => {
+              <div className="grid grid-cols-7 gap-1 mb-3">
+                {last7.map((date) => {
                   const rec     = records.find((r) => r.date === date);
                   const d       = new Date(date + 'T00:00:00');
                   const isToday = date === today;
-                  const isSat   = d.getDay() === 6;
                   const isSun   = d.getDay() === 0;
+                  const isSat   = d.getDay() === 6;
                   return (
                     <div key={date}
-                      className="flex flex-col items-center rounded-xl py-2.5 px-0.5 border transition-colors"
+                      className="flex flex-col items-center rounded-xl py-2 px-0.5 border"
                       style={{
-                        background: isToday ? th.calToday : th.calRow,
-                        borderColor: isToday ? th.calTodayBorder : th.calBorder,
+                        background: isToday ? th.calToday : th.calCell,
+                        borderColor: isToday ? th.calTodayBorder : th.calCellBorder,
                       }}>
                       <span className="text-[11px] font-bold mb-0.5"
                         style={{ color: isSun ? '#f87171' : isSat ? '#60a5fa' : th.textSub }}>
@@ -781,16 +816,18 @@ export default function App() {
                       </span>
                       {rec ? (
                         <div className="flex flex-col items-center gap-0.5">
-                          <div className="flex flex-wrap justify-center gap-0.5">
+                          <div className="flex flex-wrap justify-center">
                             {[1,2,3,4,5].map((n) => (
-                              <span key={n} className="text-[10px]"
+                              <span key={n} className="text-[9px]"
                                 style={{ filter: n<=rec.score ? 'none' : 'grayscale(1) opacity(0.15)' }}>⭐</span>
                             ))}
                           </div>
-                          <span className="text-[10px] font-black" style={{ color: th.starLabel }}>{rec.score}점</span>
+                          <span className="text-[10px] font-black" style={{ color: th.calScore }}>
+                            {rec.score}점
+                          </span>
                         </div>
                       ) : (
-                        <span className="text-base" style={{ color: th.calBorder }}>—</span>
+                        <span className="text-sm font-medium" style={{ color: th.calDash }}>—</span>
                       )}
                     </div>
                   );
@@ -799,7 +836,7 @@ export default function App() {
 
               {/* 메모 */}
               <div className="flex-1 overflow-y-auto space-y-1.5">
-                {last7Days
+                {last7
                   .map((date) => records.find((r) => r.date === date))
                   .filter((r): r is DayRecord => !!r && !!r.note)
                   .reverse()
@@ -809,15 +846,20 @@ export default function App() {
                       <span className="text-xs shrink-0 mt-0.5 w-10" style={{ color: th.rowDate }}>
                         {r.date.slice(5).replace('-','/')}
                       </span>
-                      <span className="text-xs leading-relaxed italic" style={{ color: th.rowText }}>"{r.note}"</span>
+                      <span className="text-xs leading-relaxed italic" style={{ color: th.rowText }}>
+                        "{r.note}"
+                      </span>
                     </div>
                   ))}
-                {last7Days.every((date) => { const r = records.find((rc) => rc.date===date); return !r||!r.note; }) && (
-                  <p className="text-xs text-center py-3" style={{ color: th.rowDate }}>이번 주 메모가 없습니다.</p>
+                {last7.every((d) => { const r = records.find((rc) => rc.date===d); return !r||!r.note; }) && (
+                  <p className="text-xs text-center py-3" style={{ color: th.calDash }}>
+                    이번 주 메모가 없습니다.
+                  </p>
                 )}
               </div>
             </div>
-          </div>
+
+          </div>{/* /grid */}
 
           {/* 푸터 */}
           <p className="text-xs mt-6 text-center tracking-wide" style={{ color: th.footerText }}>

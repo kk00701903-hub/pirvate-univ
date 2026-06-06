@@ -21,6 +21,13 @@ body {
   padding: 0;
 }
 
+/* 플레이스홀더 색상 (CSS 변수로 테마 반영) */
+input::placeholder,
+textarea::placeholder {
+  color: var(--placeholder-color, #cbd5e1);
+  opacity: 1;
+}
+
 @keyframes shimmer {
   0%   { background-position: -200% center; }
   100% { background-position: 200% center; }
