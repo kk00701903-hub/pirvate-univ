@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-primary: #004b8d;
+  --color-primary-light: #1a6db5;
+  --color-accent: #f59e0b;
+  --font-sans: 'Pretendard Variable', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: #f8fafc;
+  margin: 0;
+  padding: 0;
+}

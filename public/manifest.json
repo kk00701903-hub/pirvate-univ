@@ -1,0 +1,21 @@
+{
+  "name": "대학 레벨업 만족도 기록",
+  "short_name": "대학 레벨업",
+  "description": "매일 만족도를 기록하고 고려대까지 레벨업! 수험생 동기부여 앱",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#004b8d",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
