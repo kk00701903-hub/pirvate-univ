@@ -37,7 +37,7 @@ const DEFAULT_LEVELS: LevelConfig[] = [
     schools: ['경희대 식품생명공학과', '중앙대 식품공학전공', '세종대 식품생명공학과', '한양대(에리카) 식품영양학과'],
     min: 60, max: 79, color: '#8b5cf6', emoji: '⭐', logo: '/logos/level4.png' },
   { name: '인서울 상위', subtitle: '식품영양학과',
-    schools: ['한양대(서울) 식품영양학과', '연세대 식품영양학과', '서울대 식품·동물생명공학부'],
+    schools: ['한양대(서울) 식품영양학과', '성균관대 식품생명공학과'],
     min: 80, max: 94, color: '#f59e0b', emoji: '🔥', logo: '/logos/level5.png' },
   { name: '고려대학교', subtitle: '식품공학과 (최종 목표)',
     schools: ['고려대 식품공학과'],
