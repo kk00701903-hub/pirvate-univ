@@ -1,13 +1,117 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 
-/* ─────────────────────────────── 타입 */
+/* ═══════════════════════════════════════
+   테마 토큰
+═══════════════════════════════════════ */
+type ThemeId = 'light' | 'dark';
+
+const LIGHT = {
+  id: 'light' as ThemeId,
+  pageBg:        'linear-gradient(160deg, #f0f7ff 0%, #e8f4fd 40%, #fef9ee 100%)',
+  blob1:         'rgba(186,230,255,0.35)',
+  blob2:         'rgba(254,202,202,0.28)',
+  bodyBg:        '#f0f7ff',
+  cardBg:        '#ffffff',
+  cardBorder:    'rgba(226,232,240,0.9)',
+  textH:         '#1e293b',
+  textSub:       '#94a3b8',
+  textLabel:     '#64748b',
+  textBody:      '#475569',
+  inputBg:       '#f8fafc',
+  inputBorder:   '#e2e8f0',
+  inputText:     '#334155',
+  inputPlace:    '#cbd5e1',
+  rowBg:         '#f8fafc',
+  rowBorder:     '#f1f5f9',
+  rowText:       '#64748b',
+  rowDate:       '#cbd5e1',
+  starLabel:     '#d97706',
+  footerText:    '#cbd5e1',
+  checkBg:       '#dcfce7',
+  checkBorder:   '#86efac',
+  checkText:     '#16a34a',
+  calToday:      '#eff6ff',
+  calTodayBorder:'#bfdbfe',
+  calRow:        '#f8fafc',
+  calBorder:     '#f1f5f9',
+  settingsBg:    '#ffffff',
+  settingsHBorder:'#f1f5f9',
+  setLevelBg:    (c: string) => c + '08',
+  setLevelBorder:(c: string) => c + '33',
+  recoverBorder: '#fde68a',
+  recoverBg:     '#fffbeb',
+  recoverListBg: '#f8fafc',
+  tabActive:     '#004b8d',
+  tabActiveTxt:  '#ffffff',
+  tabInactive:   'transparent',
+  tabInactiveTxt:'#64748b',
+  saveBtn:       'linear-gradient(135deg,#004b8d,#1a6db5)',
+  saveShadow:    '0 4px 20px #004b8d44',
+  savedBtn:      'linear-gradient(135deg,#22c55e,#16a34a)',
+  savedShadow:   '0 4px 20px #22c55e44',
+  settSaveBtn:   '#004b8d',
+};
+
+const DARK = {
+  id: 'dark' as ThemeId,
+  pageBg:        '#0a1628',
+  blob1:         'rgba(0,75,141,0.22)',
+  blob2:         'rgba(139,0,0,0.18)',
+  bodyBg:        '#0a1628',
+  cardBg:        'rgba(13,31,61,0.88)',
+  cardBorder:    'rgba(255,255,255,0.1)',
+  textH:         '#f1f5f9',
+  textSub:       'rgba(255,255,255,0.32)',
+  textLabel:     'rgba(255,255,255,0.55)',
+  textBody:      'rgba(255,255,255,0.7)',
+  inputBg:       'rgba(255,255,255,0.07)',
+  inputBorder:   'rgba(255,255,255,0.15)',
+  inputText:     '#e2e8f0',
+  inputPlace:    'rgba(255,255,255,0.2)',
+  rowBg:         'rgba(255,255,255,0.05)',
+  rowBorder:     'rgba(255,255,255,0.06)',
+  rowText:       'rgba(255,255,255,0.5)',
+  rowDate:       'rgba(255,255,255,0.2)',
+  starLabel:     '#d4a017',
+  footerText:    'rgba(255,255,255,0.2)',
+  checkBg:       'rgba(34,197,94,0.15)',
+  checkBorder:   'rgba(34,197,94,0.3)',
+  checkText:     '#4ade80',
+  calToday:      'rgba(212,160,23,0.18)',
+  calTodayBorder:'rgba(212,160,23,0.45)',
+  calRow:        'rgba(255,255,255,0.05)',
+  calBorder:     'rgba(255,255,255,0.05)',
+  settingsBg:    '#0d1f3d',
+  settingsHBorder:'rgba(255,255,255,0.1)',
+  setLevelBg:    (c: string) => c + '12',
+  setLevelBorder:(c: string) => c + '40',
+  recoverBorder: 'rgba(212,160,23,0.35)',
+  recoverBg:     'rgba(212,160,23,0.08)',
+  recoverListBg: 'rgba(255,255,255,0.05)',
+  tabActive:     '#d4a017',
+  tabActiveTxt:  '#0a1628',
+  tabInactive:   'transparent',
+  tabInactiveTxt:'rgba(255,255,255,0.45)',
+  saveBtn:       'linear-gradient(135deg,#d4a017,#f9d423)',
+  saveShadow:    '0 4px 20px #d4a01744',
+  savedBtn:      'linear-gradient(135deg,#22c55e,#16a34a)',
+  savedShadow:   '0 4px 20px #22c55e44',
+  settSaveBtn:   '#d4a017',
+};
+
+type Tokens = typeof LIGHT;
+const ThemeCtx = createContext<Tokens>(LIGHT);
+function useTheme() { return useContext(ThemeCtx); }
+
+/* ═══════════════════════════════════════
+   타입 & 데이터
+═══════════════════════════════════════ */
 type LevelConfig = {
   name: string; subtitle: string; schools: string[];
   min: number; max: number; color: string; emoji: string; logo: string;
 };
 type DayRecord = { date: string; score: number; note: string; };
 
-/* ─────────────────────────────── 레벨 데이터 */
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const DEFAULT_LEVELS: LevelConfig[] = [
@@ -31,39 +135,39 @@ const DEFAULT_LEVELS: LevelConfig[] = [
 const STORAGE_KEY = 'univer_records';
 const LEVELS_KEY  = 'univer_levels';
 const LEVELS_VER  = 'v5-2506';
+const THEME_KEY   = 'univer_theme';
 
 const STAR_LABELS: Record<number, string> = {
   1: '매우 나쁨', 2: '나쁨', 3: '보통', 4: '좋음', 5: '최고!',
 };
+
+const LEVEL_GRAD = [
+  { from: '#e2e8f0', to: '#94a3b8', text: '#1e293b' },
+  { from: '#d1fae5', to: '#6ee7b7', text: '#064e3b' },
+  { from: '#dbeafe', to: '#93c5fd', text: '#1e3a8a' },
+  { from: '#fef3c7', to: '#fcd34d', text: '#78350f' },
+  { from: '#ffe4e6', to: '#fca5a5', text: '#7f1d1d' },
+];
 
 function getTodayString() { return new Date().toISOString().slice(0, 10); }
 function getLevel(s: number, ls: LevelConfig[]) {
   return ls.find((l) => s >= l.min && s <= l.max) ?? ls[0];
 }
 
-/* ─────────────────────────────── 레벨 히어로 그라데이션 */
-const LEVEL_GRAD = [
-  { from: '#e2e8f0', to: '#94a3b8', text: '#1e293b' },   // Lv1 slate
-  { from: '#d1fae5', to: '#6ee7b7', text: '#064e3b' },   // Lv2 emerald
-  { from: '#dbeafe', to: '#93c5fd', text: '#1e3a8a' },   // Lv3 blue
-  { from: '#fef3c7', to: '#fcd34d', text: '#78350f' },   // Lv4 amber
-  { from: '#ffe4e6', to: '#fca5a5', text: '#7f1d1d' },   // Lv5 crimson
-];
-
-/* ─────────────────────────────── 로고 영역 (iPad 9 최적: 240×240) */
+/* ═══════════════════════════════════════
+   로고 영역  240 × 240
+═══════════════════════════════════════ */
 function LevelLogoArea({ logo, levelIdx }: { logo: string; levelIdx: number }) {
   const [failed, setFailed] = useState(false);
   const grad = LEVEL_GRAD[levelIdx] ?? LEVEL_GRAD[0];
 
   if (!failed) return (
-    <div className="w-[240px] h-[240px] shrink-0 rounded-2xl overflow-hidden
-                    shadow-2xl ring-4 ring-white/60">
+    <div className="w-[240px] h-[240px] shrink-0 rounded-2xl overflow-hidden shadow-2xl ring-4 ring-white/60">
       <img src={logo} alt={`레벨 ${levelIdx + 1} 로고`}
         className="w-full h-full object-cover"
         onError={() => setFailed(true)} />
     </div>
   );
-
   return (
     <div className="w-[240px] h-[240px] shrink-0 flex flex-col items-center justify-center
                     rounded-2xl border-2 border-dashed shadow-inner"
@@ -76,8 +180,11 @@ function LevelLogoArea({ logo, levelIdx }: { logo: string; levelIdx: number }) {
   );
 }
 
-/* ─────────────────────────────── 별점 */
+/* ═══════════════════════════════════════
+   별점 선택
+═══════════════════════════════════════ */
 function StarPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  const th = useTheme();
   const [hov, setHov] = useState(0);
   const d = hov || value;
   return (
@@ -92,23 +199,58 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
           </button>
         ))}
       </div>
-      <p className="text-center text-sm font-bold text-amber-600 h-5">
+      <p className="text-center text-sm font-bold h-5" style={{ color: th.starLabel }}>
         {d ? `${d}점 · ${STAR_LABELS[d]}` : ''}
       </p>
     </div>
   );
 }
 
-/* ─────────────────────────────── 설정 패널 */
-function SettingsPanel({ levels, records, totalScore, onSave, onAddRecord, onClose }: {
+/* ═══════════════════════════════════════
+   테마 토글 버튼
+═══════════════════════════════════════ */
+function ThemeToggle({ theme, onToggle }: { theme: ThemeId; onToggle: () => void }) {
+  const isDark = theme === 'dark';
+  return (
+    <button
+      onClick={onToggle}
+      aria-label="테마 전환"
+      className="relative flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm
+                 transition-all active:scale-95 border"
+      style={{
+        background: isDark ? 'rgba(255,255,255,0.1)' : '#f1f5f9',
+        borderColor: isDark ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
+        color: isDark ? '#f1f5f9' : '#475569',
+      }}
+    >
+      <span className="text-lg leading-none">{isDark ? '🌙' : '☀️'}</span>
+      <span>{isDark ? '야간 모드' : '주간 모드'}</span>
+      {/* 슬라이더 */}
+      <span
+        className="w-10 h-5 rounded-full flex items-center transition-all duration-300 ml-1"
+        style={{ background: isDark ? '#d4a017' : '#cbd5e1' }}>
+        <span
+          className="w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300"
+          style={{ transform: isDark ? 'translateX(22px)' : 'translateX(2px)' }} />
+      </span>
+    </button>
+  );
+}
+
+/* ═══════════════════════════════════════
+   설정 패널
+═══════════════════════════════════════ */
+function SettingsPanel({ levels, records, totalScore, theme, onSave, onAddRecord, onThemeChange, onClose }: {
   levels: LevelConfig[]; records: DayRecord[]; totalScore: number;
+  theme: ThemeId;
   onSave: (u: LevelConfig[]) => void;
   onAddRecord: (r: DayRecord) => void;
+  onThemeChange: () => void;
   onClose: () => void;
 }) {
-  const [draft, setDraft] = useState<LevelConfig[]>(
-    levels.map((l) => ({ ...l, schools: [...l.schools] })));
-  const [tab, setTab]       = useState<'levels'|'recovery'>('levels');
+  const th = useTheme();
+  const [draft, setDraft]       = useState<LevelConfig[]>(levels.map((l) => ({ ...l, schools: [...l.schools] })));
+  const [tab, setTab]           = useState<'levels'|'recovery'>('levels');
   const [recDate, setRecDate]   = useState(getTodayString());
   const [recScore, setRecScore] = useState(3);
   const [recNote, setRecNote]   = useState('');
@@ -130,44 +272,58 @@ function SettingsPanel({ levels, records, totalScore, onSave, onAddRecord, onClo
     setRecNote('');
   };
 
-  const inputCls = 'w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-300';
+  const inputCls = 'w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 border';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-3">
-      <div className="bg-white rounded-3xl w-full max-w-[740px] max-h-[90vh] flex flex-col shadow-2xl border border-slate-100">
-        <div className="flex items-center justify-between px-7 py-5 border-b border-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3"
+      style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}>
+      <div className="rounded-3xl w-full max-w-[740px] max-h-[90vh] flex flex-col shadow-2xl border"
+        style={{ background: th.settingsBg, borderColor: th.settingsHBorder }}>
+
+        {/* 헤더 */}
+        <div className="flex items-center justify-between px-6 py-4 border-b"
+          style={{ borderColor: th.settingsHBorder }}>
           <div className="flex gap-2">
             {(['levels','recovery'] as const).map((t) => (
               <button key={t} onClick={() => setTab(t)}
-                className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${
-                  tab===t ? 'bg-[#004b8d] text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100'
-                }`}>
+                className="px-4 py-2 rounded-xl font-bold text-sm transition-all"
+                style={{
+                  background: tab===t ? th.tabActive : th.tabInactive,
+                  color: tab===t ? th.tabActiveTxt : th.tabInactiveTxt,
+                }}>
                 {t==='levels' ? '🏫 레벨 설정' : '🔧 점수 복구'}
               </button>
             ))}
           </div>
           <div className="flex gap-2 items-center">
+            {/* 테마 전환 */}
+            <ThemeToggle theme={theme} onToggle={onThemeChange} />
             {tab==='levels' && (
               <>
                 <button onClick={handleReset}
-                  className="text-sm text-slate-400 hover:text-slate-600 px-4 py-2 rounded-xl hover:bg-slate-100">
+                  className="text-sm px-3 py-2 rounded-xl transition-colors"
+                  style={{ color: th.textSub }}>
                   기본값 복원
                 </button>
                 <button onClick={() => onSave(draft)}
-                  className="text-sm font-bold bg-[#004b8d] text-white px-5 py-2 rounded-xl hover:bg-blue-800">
+                  className="text-sm font-bold text-white px-4 py-2 rounded-xl hover:brightness-110"
+                  style={{ background: th.settSaveBtn }}>
                   저장
                 </button>
               </>
             )}
-            <button onClick={onClose} className="text-slate-300 hover:text-slate-500 text-2xl leading-none px-2">✕</button>
+            <button onClick={onClose}
+              className="text-2xl leading-none px-2 transition-colors"
+              style={{ color: th.textSub }}>✕</button>
           </div>
         </div>
 
+        {/* 탭: 레벨 설정 */}
         {tab==='levels' && (
-          <div className="overflow-y-auto px-7 py-6 space-y-4">
+          <div className="overflow-y-auto px-6 py-5 space-y-4">
             {draft.map((lv, i) => (
-              <div key={i} className="rounded-2xl p-5 border-2"
-                style={{ borderColor: lv.color+'33', background: lv.color+'08' }}>
+              <div key={i} className="rounded-2xl p-5 border"
+                style={{ background: th.setLevelBg(lv.color), borderColor: th.setLevelBorder(lv.color) }}>
                 <div className="flex items-center justify-between gap-3 mb-4">
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{lv.emoji}</span>
@@ -176,25 +332,31 @@ function SettingsPanel({ levels, records, totalScore, onSave, onAddRecord, onClo
                       Lv.{i+1} · {lv.min}~{lv.max}점
                     </div>
                   </div>
-                  <div className="w-14 h-14 shrink-0 rounded-xl overflow-hidden border-2"
-                    style={{ borderColor: lv.color+'44' }}>
+                  <div className="w-12 h-12 shrink-0 rounded-xl overflow-hidden border"
+                    style={{ borderColor: lv.color + '44' }}>
                     <img src={lv.logo} alt="" className="w-full h-full object-contain p-1"
                       onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity='0'; }} />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3 mb-3">
-                  <div>
-                    <label className="text-xs text-slate-500 mb-1 block">레벨 이름</label>
-                    <input className={inputCls} value={lv.name} onChange={(e) => upField(i,'name',e.target.value)} />
-                  </div>
-                  <div>
-                    <label className="text-xs text-slate-500 mb-1 block">부제목</label>
-                    <input className={inputCls} value={lv.subtitle} onChange={(e) => upField(i,'subtitle',e.target.value)} />
-                  </div>
+                  {(['name','subtitle'] as const).map((f) => (
+                    <div key={f}>
+                      <label className="text-xs mb-1 block" style={{ color: th.textLabel }}>
+                        {f==='name' ? '레벨 이름' : '부제목'}
+                      </label>
+                      <input className={inputCls}
+                        style={{ background: th.inputBg, borderColor: th.inputBorder, color: th.inputText }}
+                        value={lv[f]} onChange={(e) => upField(i, f, e.target.value)} />
+                    </div>
+                  ))}
                 </div>
                 <div>
-                  <label className="text-xs text-slate-500 mb-1 block">대학 목록 <span className="text-slate-400">(쉼표 구분)</span></label>
-                  <input className={inputCls} value={lv.schools.join(', ')} onChange={(e) => upSchools(i,e.target.value)} />
+                  <label className="text-xs mb-1 block" style={{ color: th.textLabel }}>
+                    대학 목록 <span style={{ color: th.textSub }}>(쉼표 구분)</span>
+                  </label>
+                  <input className={inputCls}
+                    style={{ background: th.inputBg, borderColor: th.inputBorder, color: th.inputText }}
+                    value={lv.schools.join(', ')} onChange={(e) => upSchools(i, e.target.value)} />
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     {lv.schools.map((s) => (
                       <span key={s} className="text-xs px-2 py-0.5 rounded-full text-white"
@@ -207,28 +369,32 @@ function SettingsPanel({ levels, records, totalScore, onSave, onAddRecord, onClo
           </div>
         )}
 
+        {/* 탭: 점수 복구 */}
         {tab==='recovery' && (
-          <div className="overflow-y-auto px-7 py-6 space-y-5">
-            <div className="rounded-2xl bg-slate-50 border border-slate-200 p-5 flex items-center gap-4">
-              <div className="text-5xl font-black text-[#004b8d]">{totalScore}</div>
+          <div className="overflow-y-auto px-6 py-5 space-y-4">
+            <div className="rounded-2xl p-5 flex items-center gap-4 border"
+              style={{ background: th.rowBg, borderColor: th.rowBorder }}>
+              <div className="text-5xl font-black" style={{ color: th.tabActive }}>{totalScore}</div>
               <div>
-                <p className="font-bold text-slate-700">현재 누적 점수</p>
-                <p className="text-sm text-slate-400">{records.length}일 기록됨 (최대 100점)</p>
+                <p className="font-bold" style={{ color: th.textH }}>현재 누적 점수</p>
+                <p className="text-sm" style={{ color: th.textSub }}>{records.length}일 기록됨 (최대 100점)</p>
               </div>
             </div>
-            <div className="rounded-2xl border-2 border-amber-200 bg-amber-50 p-6">
-              <h3 className="font-bold text-slate-700 text-lg mb-1">📅 날짜별 점수 추가</h3>
-              <p className="text-sm text-slate-500 mb-5">기록이 사라진 날짜의 점수를 직접 입력해 복구하세요.</p>
+            <div className="rounded-2xl p-5 border"
+              style={{ background: th.recoverBg, borderColor: th.recoverBorder }}>
+              <h3 className="font-bold text-lg mb-1" style={{ color: th.textH }}>📅 날짜별 점수 추가</h3>
+              <p className="text-sm mb-5" style={{ color: th.textSub }}>기록이 사라진 날짜의 점수를 직접 입력해 복구하세요.</p>
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="text-xs text-slate-500 mb-1 block font-medium">날짜 선택</label>
+                  <label className="text-xs mb-1 block font-medium" style={{ color: th.textLabel }}>날짜 선택</label>
                   <input type="date"
-                    className="w-full border border-slate-200 bg-white rounded-xl px-4 py-3 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                    className="w-full rounded-xl px-4 py-3 text-base border focus:outline-none focus:ring-2 focus:ring-amber-400"
+                    style={{ background: th.inputBg, borderColor: th.inputBorder, color: th.inputText }}
                     value={recDate} max={getTodayString()}
                     onChange={(e) => { setRecDate(e.target.value); setRecMsg(''); }} />
                 </div>
                 <div>
-                  <label className="text-xs text-slate-500 mb-1 block font-medium">별점</label>
+                  <label className="text-xs mb-1 block font-medium" style={{ color: th.textLabel }}>별점</label>
                   <div className="flex gap-2 items-center h-[46px]">
                     {[1,2,3,4,5].map((n) => (
                       <button key={n} onClick={() => setRecScore(n)}
@@ -237,39 +403,42 @@ function SettingsPanel({ levels, records, totalScore, onSave, onAddRecord, onClo
                         ⭐
                       </button>
                     ))}
-                    <span className="text-sm font-bold text-amber-600 ml-1">{recScore}점</span>
+                    <span className="text-sm font-bold ml-1" style={{ color: th.starLabel }}>{recScore}점</span>
                   </div>
                 </div>
               </div>
               <div className="mb-4">
-                <label className="text-xs text-slate-500 mb-1 block font-medium">메모 (선택)</label>
-                <input className="w-full border border-slate-200 bg-white rounded-xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                <label className="text-xs mb-1 block font-medium" style={{ color: th.textLabel }}>메모 (선택)</label>
+                <input className="w-full rounded-xl px-4 py-3 text-sm border focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  style={{ background: th.inputBg, borderColor: th.inputBorder, color: th.inputText }}
                   placeholder="예: 복구된 기록" value={recNote} onChange={(e) => setRecNote(e.target.value)} />
               </div>
               <button onClick={handleAdd}
-                className="w-full py-3 rounded-2xl font-bold text-white text-base active:scale-95 bg-amber-500 hover:bg-amber-600 transition-colors">
+                className="w-full py-3 rounded-xl font-bold text-white text-base active:scale-95 transition-all bg-amber-500 hover:bg-amber-600">
                 이 날짜 점수 추가
               </button>
               {recMsg && (
-                <p className="mt-3 text-sm text-center font-medium text-slate-600 bg-white rounded-xl py-2 px-4 border border-slate-200">
+                <p className="mt-3 text-sm text-center font-medium rounded-xl py-2 px-4 border"
+                  style={{ color: th.textBody, background: th.rowBg, borderColor: th.rowBorder }}>
                   {recMsg}
                 </p>
               )}
             </div>
             {records.length > 0 && (
               <div>
-                <h3 className="font-semibold text-slate-500 text-sm mb-3">저장된 기록 ({records.length}개)</h3>
-                <ul className="space-y-1.5 max-h-48 overflow-y-auto">
+                <h3 className="font-semibold text-sm mb-3" style={{ color: th.textSub }}>저장된 기록 ({records.length}개)</h3>
+                <ul className="space-y-1.5 max-h-44 overflow-y-auto">
                   {[...records].sort((a,b) => b.date.localeCompare(a.date)).map((r) => (
-                    <li key={r.date} className="flex items-center gap-3 bg-slate-50 rounded-xl px-4 py-2.5">
-                      <span className="text-sm text-slate-400 w-24 shrink-0">{r.date}</span>
+                    <li key={r.date} className="flex items-center gap-3 rounded-xl px-4 py-2.5 border"
+                      style={{ background: th.rowBg, borderColor: th.rowBorder }}>
+                      <span className="text-sm w-24 shrink-0" style={{ color: th.rowDate }}>{r.date}</span>
                       <div className="flex">
                         {[1,2,3,4,5].map((n) => (
                           <span key={n} className="text-sm"
                             style={{ filter: n<=r.score ? 'none' : 'grayscale(1) opacity(0.2)' }}>⭐</span>
                         ))}
                       </div>
-                      {r.note && <span className="text-xs text-slate-400 truncate">· {r.note}</span>}
+                      {r.note && <span className="text-xs truncate" style={{ color: th.textSub }}>· {r.note}</span>}
                     </li>
                   ))}
                 </ul>
@@ -282,16 +451,18 @@ function SettingsPanel({ levels, records, totalScore, onSave, onAddRecord, onClo
   );
 }
 
-/* ─────────────────────────────── 수능 카운트다운 */
+/* ═══════════════════════════════════════
+   수능 카운트다운
+═══════════════════════════════════════ */
 const SUNEUNG_DATE = new Date('2027-11-18T00:00:00');
 
 function CountdownBanner() {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => { const id = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(id); }, []);
 
-  const diffMs   = SUNEUNG_DATE.getTime() - now.getTime();
+  const diffMs = SUNEUNG_DATE.getTime() - now.getTime();
   if (diffMs <= 0) return (
-    <div className="w-full rounded-3xl bg-gradient-to-r from-yellow-400 to-orange-400 p-5 mb-6 text-center shadow-lg">
+    <div className="w-full rounded-3xl bg-gradient-to-r from-yellow-400 to-orange-400 p-5 mb-5 text-center shadow-lg">
       <p className="text-2xl font-bold text-white">🎉 수능 당일! 최선을 다하세요!</p>
     </div>
   );
@@ -303,7 +474,7 @@ function CountdownBanner() {
   const secs = ts % 60;
 
   return (
-    <div className="w-full rounded-3xl mb-6 overflow-hidden shadow-xl relative"
+    <div className="w-full rounded-2xl mb-5 overflow-hidden shadow-xl relative"
       style={{ background: 'linear-gradient(135deg,#004b8d 0%,#1a6db5 50%,#9b1b1b 100%)' }}>
       <div className="absolute inset-0 opacity-10"
         style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
@@ -329,7 +500,9 @@ function CountdownBanner() {
   );
 }
 
-/* ─────────────────────────────── 메인 앱 */
+/* ═══════════════════════════════════════
+   메인 앱
+═══════════════════════════════════════ */
 export default function App() {
   const [records, setRecords] = useState<DayRecord[]>(() => {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]'); } catch { return []; }
@@ -346,36 +519,43 @@ export default function App() {
       return saved ? JSON.parse(saved) : DEFAULT_LEVELS;
     } catch { return DEFAULT_LEVELS; }
   });
+  const [themeId, setThemeId] = useState<ThemeId>(() =>
+    (localStorage.getItem(THEME_KEY) as ThemeId) ?? 'light'
+  );
 
-  const [score, setScore]           = useState(3);
-  const [note, setNote]             = useState('');
-  const [saved, setSaved]           = useState(false);
+  const [score, setScore]               = useState(3);
+  const [note, setNote]                 = useState('');
+  const [saved, setSaved]               = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
-  const today       = getTodayString();
-  const todayRecord = records.find((r) => r.date === today);
-  const totalScore  = Math.min(100, records.reduce((s, r) => s + r.score, 0));
-  const level       = getLevel(totalScore, levels);
-  const levelIdx    = levels.indexOf(level);
-  const grad        = LEVEL_GRAD[levelIdx] ?? LEVEL_GRAD[0];
+  const th       = themeId === 'dark' ? DARK : LIGHT;
+  const today    = getTodayString();
+  const todayRec = records.find((r) => r.date === today);
+  const total    = Math.min(100, records.reduce((s, r) => s + r.score, 0));
+  const level    = getLevel(total, levels);
+  const levelIdx = levels.indexOf(level);
+  const grad     = LEVEL_GRAD[levelIdx] ?? LEVEL_GRAD[0];
 
   useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); }, [records]);
   useEffect(() => { localStorage.setItem(LEVELS_KEY,  JSON.stringify(levels));  }, [levels]);
+  useEffect(() => {
+    localStorage.setItem(THEME_KEY, themeId);
+    document.body.style.background = th.bodyBg;
+  }, [themeId, th.bodyBg]);
 
   const handleSave = () => {
-    if (todayRecord) return;
+    if (todayRec) return;
     setRecords((p) => [...p, { date: today, score, note }]);
     setSaved(true); setTimeout(() => setSaved(false), 2000);
   };
   const handleReset      = () => { if (confirm('모든 기록을 초기화할까요?')) setRecords([]); };
   const handleSaveLevels = (u: LevelConfig[]) => { setLevels(u); setShowSettings(false); };
-  const handleAddRecord  = (r: DayRecord)     => setRecords((p) => [...p, r]);
-  const handleExport     = () => {
+  const handleAddRecord  = (r: DayRecord) => setRecords((p) => [...p, r]);
+  const handleToggleTheme = () => setThemeId((t) => t === 'light' ? 'dark' : 'light');
+  const handleExport = () => {
     const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), records }, null, 2)], { type:'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url;
-    a.download = `univer-records-${today}.json`; a.click();
-    URL.revokeObjectURL(url);
+    const url = URL.createObjectURL(blob); const a = document.createElement('a');
+    a.href = url; a.download = `univer-records-${today}.json`; a.click(); URL.revokeObjectURL(url);
   };
 
   const last7Days = Array.from({ length: 7 }, (_, i) => {
@@ -384,269 +564,267 @@ export default function App() {
   const DAY_KO = ['일','월','화','수','목','금','토'];
 
   return (
-    /* iPad 9 (810×1080 CSS px) 최적화 */
-    <div className="min-h-screen relative flex flex-col items-center px-4 py-6 overflow-x-hidden"
-      style={{ background: 'linear-gradient(160deg, #f0f7ff 0%, #e8f4fd 40%, #fef9ee 100%)' }}>
+    <ThemeCtx.Provider value={th}>
+      <div className="min-h-screen relative flex flex-col items-center px-4 py-6 overflow-x-hidden transition-colors duration-300"
+        style={{ background: th.pageBg }}>
 
-      {/* 배경 장식 원형 블롭 */}
-      <div className="fixed top-[-80px] left-[-80px] w-[500px] h-[500px] rounded-full opacity-30
-                      bg-gradient-to-br from-blue-200 to-sky-100 blur-[80px] pointer-events-none" />
-      <div className="fixed bottom-[-100px] right-[-60px] w-[400px] h-[400px] rounded-full opacity-25
-                      bg-gradient-to-br from-rose-200 to-orange-100 blur-[80px] pointer-events-none" />
+        {/* 배경 블롭 */}
+        <div className="fixed top-[-80px] left-[-80px] w-[500px] h-[500px] rounded-full blur-[80px] pointer-events-none transition-colors duration-500"
+          style={{ background: th.blob1 }} />
+        <div className="fixed bottom-[-100px] right-[-60px] w-[400px] h-[400px] rounded-full blur-[80px] pointer-events-none transition-colors duration-500"
+          style={{ background: th.blob2 }} />
 
-      {showSettings && (
-        <SettingsPanel levels={levels} records={records} totalScore={totalScore}
-          onSave={handleSaveLevels} onAddRecord={handleAddRecord} onClose={() => setShowSettings(false)} />
-      )}
+        {showSettings && (
+          <SettingsPanel levels={levels} records={records} totalScore={total}
+            theme={themeId}
+            onSave={handleSaveLevels} onAddRecord={handleAddRecord}
+            onThemeChange={handleToggleTheme}
+            onClose={() => setShowSettings(false)} />
+        )}
 
-      {/* iPad 9 세로 뷰포트 810px → 좌우 16px 여백 → 콘텐츠 778px */}
-      <div className="w-full max-w-[778px] relative z-10">
+        <div className="w-full max-w-[778px] relative z-10">
 
-        {/* ── 헤더 */}
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <div className="flex items-center gap-2.5 mb-1">
-              <span className="text-2xl">🎓</span>
-              <h1 className="text-2xl font-black text-slate-800 tracking-tight">대학 레벨업</h1>
+          {/* ── 헤더 */}
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <div className="flex items-center gap-2.5 mb-1">
+                <span className="text-2xl">🎓</span>
+                <h1 className="text-2xl font-black tracking-tight" style={{ color: th.textH }}>대학 레벨업</h1>
+              </div>
+              <p className="text-xs pl-1" style={{ color: th.textSub }}>고려대 식품공학과까지, 오늘도 캠퍼스를 향해</p>
             </div>
-            <p className="text-slate-400 text-xs pl-1">고려대 식품공학과까지, 오늘도 캠퍼스를 향해</p>
+            <div className="flex gap-2 items-center">
+              {/* 헤더 테마 토글 (빠른 전환용) */}
+              <button onClick={handleToggleTheme}
+                aria-label="테마 전환"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-xl
+                           transition-all active:scale-90 border"
+                style={{
+                  background: th.inputBg,
+                  borderColor: th.inputBorder,
+                  color: th.textH,
+                }}>
+                {themeId === 'dark' ? '🌙' : '☀️'}
+              </button>
+              <button onClick={() => setShowSettings(true)}
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-semibold text-sm
+                           border transition-all active:scale-95"
+                style={{ background: th.cardBg, borderColor: th.cardBorder, color: th.textBody }}>
+                ⚙️ 설정
+              </button>
+            </div>
           </div>
-          <button onClick={() => setShowSettings(true)}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-semibold text-sm
-                       bg-white border border-slate-200 text-slate-600 shadow-sm
-                       hover:bg-slate-50 active:scale-95 transition-all">
-            ⚙️ 설정
-          </button>
-        </div>
 
-        {/* ── 수능 카운트다운 */}
-        <CountdownBanner />
+          {/* ── 수능 카운트다운 */}
+          <CountdownBanner />
 
-        {/* ── 레벨 히어로 카드 */}
-        <div className="w-full rounded-[24px] mb-5 overflow-hidden shadow-xl relative"
-          style={{ background: `linear-gradient(135deg, ${grad.from} 0%, ${grad.to} 100%)` }}>
-
-          {/* 상단 컬러 스트라이프 */}
-          <div className="h-1.5 w-full" style={{ background: level.color }} />
-          {/* 패턴 */}
-          <div className="absolute inset-0 opacity-[0.07] pointer-events-none"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000' fill-opacity='1'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-            }} />
-
-          <div className="relative p-6">
-            {/* 레벨 뱃지 */}
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-[11px] font-black tracking-[0.18em] uppercase"
-                style={{ color: grad.text + 'aa' }}>Current Level</span>
-              <div className="h-px flex-1 opacity-20" style={{ background: grad.text }} />
-              <span className="text-xs font-black px-3 py-1 rounded-full border"
-                style={{ color: grad.text, borderColor: grad.text + '40', background: grad.text + '15' }}>
-                {levelIdx + 1} / {levels.length}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-6">
-              {/* 왼쪽 텍스트 */}
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold tracking-widest uppercase mb-1.5"
-                  style={{ color: grad.text + 'bb' }}>
-                  {level.emoji} {level.subtitle}
-                </p>
-                <h2 className="text-4xl font-black leading-none mb-3 tracking-tight" style={{ color: grad.text }}>
-                  {level.name}
-                </h2>
-                <div className="flex flex-wrap gap-1.5 mb-5">
-                  {level.schools.map((s) => (
-                    <span key={s} className="text-xs font-semibold rounded-full px-2.5 py-1"
-                      style={{
-                        color: grad.text,
-                        background: grad.text + '18',
-                        border: `1px solid ${grad.text}30`,
-                      }}>
-                      {s}
-                    </span>
-                  ))}
-                </div>
-
-                {/* 진행도 바 */}
-                <div>
-                  <div className="flex justify-between text-xs mb-1.5 font-medium"
-                    style={{ color: grad.text + '88' }}>
-                    <span>진행도</span>
-                    <span className="font-black" style={{ color: grad.text }}>
-                      {totalScore}<span className="font-normal opacity-60"> / 100점</span>
-                    </span>
-                  </div>
-                  <div className="h-3 rounded-full overflow-hidden border"
-                    style={{ background: grad.text + '18', borderColor: grad.text + '25' }}>
-                    <div className="h-full rounded-full transition-all duration-700"
-                      style={{
-                        width: `${totalScore}%`,
-                        background: `linear-gradient(90deg, ${level.color}cc, ${level.color})`,
-                        boxShadow: `0 0 10px ${level.color}80`,
-                      }} />
-                  </div>
-                  <div className="flex justify-between mt-1 px-0.5"
-                    style={{ color: grad.text + '50' }}>
-                    {levels.map((l) => (
-                      <span key={l.min} className="text-[10px]">{l.min}</span>
+          {/* ── 레벨 히어로 카드 */}
+          <div className="w-full rounded-[24px] mb-5 overflow-hidden shadow-xl"
+            style={{ background: `linear-gradient(135deg, ${grad.from} 0%, ${grad.to} 100%)` }}>
+            <div className="h-1.5 w-full" style={{ background: level.color }} />
+            <div className="absolute inset-0 opacity-[0.07] pointer-events-none"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000' fill-opacity='1'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+              }} />
+            <div className="relative p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-[11px] font-black tracking-[0.18em] uppercase"
+                  style={{ color: grad.text + 'aa' }}>Current Level</span>
+                <div className="h-px flex-1 opacity-20" style={{ background: grad.text }} />
+                <span className="text-xs font-black px-3 py-1 rounded-full border"
+                  style={{ color: grad.text, borderColor: grad.text + '40', background: grad.text + '15' }}>
+                  {levelIdx + 1} / {levels.length}
+                </span>
+              </div>
+              <div className="flex items-center gap-6">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold tracking-widest uppercase mb-1.5"
+                    style={{ color: grad.text + 'bb' }}>{level.emoji} {level.subtitle}</p>
+                  <h2 className="text-4xl font-black leading-none mb-3 tracking-tight" style={{ color: grad.text }}>
+                    {level.name}
+                  </h2>
+                  <div className="flex flex-wrap gap-1.5 mb-5">
+                    {level.schools.map((s) => (
+                      <span key={s} className="text-xs font-semibold rounded-full px-2.5 py-1"
+                        style={{ color: grad.text, background: grad.text + '18', border: `1px solid ${grad.text}30` }}>
+                        {s}
+                      </span>
                     ))}
-                    <span className="text-[10px]">100</span>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs mb-1.5 font-medium"
+                      style={{ color: grad.text + '88' }}>
+                      <span>진행도</span>
+                      <span className="font-black" style={{ color: grad.text }}>
+                        {total}<span className="font-normal opacity-60"> / 100점</span>
+                      </span>
+                    </div>
+                    <div className="h-3 rounded-full overflow-hidden border"
+                      style={{ background: grad.text + '18', borderColor: grad.text + '25' }}>
+                      <div className="h-full rounded-full transition-all duration-700"
+                        style={{
+                          width: `${total}%`,
+                          background: `linear-gradient(90deg, ${level.color}cc, ${level.color})`,
+                          boxShadow: `0 0 10px ${level.color}80`,
+                        }} />
+                    </div>
+                    <div className="flex justify-between mt-1 px-0.5" style={{ color: grad.text + '50' }}>
+                      {levels.map((l) => <span key={l.min} className="text-[10px]">{l.min}</span>)}
+                      <span className="text-[10px]">100</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              {/* 오른쪽: 대형 로고 */}
-              <div className="shrink-0">
-                <LevelLogoArea logo={level.logo} levelIdx={levelIdx} />
+                <div className="shrink-0">
+                  <LevelLogoArea logo={level.logo} levelIdx={levelIdx} />
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* ── 2열 그리드 (iPad 9: 각 컬럼 ~375px) */}
-        <div className="grid grid-cols-2 gap-4">
+          {/* ── 2열 그리드 */}
+          <div className="grid grid-cols-2 gap-4">
 
-          {/* 오늘의 만족도 */}
-          <div className="rounded-2xl bg-white border border-slate-200/80 p-5 shadow-lg">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-lg">✏️</span>
-              <h2 className="font-black text-slate-800 text-lg">오늘의 만족도</h2>
-            </div>
-            <p className="text-slate-400 text-xs mb-4 pl-7">{today}</p>
-
-            {todayRecord ? (
-              <div className="flex flex-col items-center justify-center py-5 gap-3">
-                <div className="w-14 h-14 rounded-full bg-green-100 border-2 border-green-300
-                                flex items-center justify-center text-2xl shadow-sm">✅</div>
-                <p className="text-green-600 font-bold text-base">오늘 기록 완료!</p>
-                <div className="flex gap-1">
-                  {[1,2,3,4,5].map((n) => (
-                    <span key={n} className="text-2xl"
-                      style={{ filter: n<=todayRecord.score ? 'drop-shadow(0 0 4px #f59e0b)' : 'grayscale(1) opacity(0.25)' }}>
-                      ⭐
-                    </span>
-                  ))}
-                </div>
-                {todayRecord.note && (
-                  <p className="text-slate-400 text-sm text-center italic">"{todayRecord.note}"</p>
-                )}
+            {/* 오늘의 만족도 */}
+            <div className="rounded-2xl p-5 border shadow-lg transition-colors duration-300"
+              style={{ background: th.cardBg, borderColor: th.cardBorder }}>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg">✏️</span>
+                <h2 className="font-black text-lg" style={{ color: th.textH }}>오늘의 만족도</h2>
               </div>
-            ) : (
-              <>
-                <StarPicker value={score} onChange={setScore} />
-                <textarea
-                  className="w-full border border-slate-200 rounded-xl p-3 text-sm
-                             text-slate-700 placeholder-slate-300 resize-none mt-4
-                             focus:outline-none focus:ring-2 focus:ring-blue-300 bg-slate-50"
-                  rows={3}
-                  placeholder="오늘 하루 한 마디 (선택)"
-                  value={note} onChange={(e) => setNote(e.target.value)}
-                />
-                <button onClick={handleSave}
-                  className="mt-3 w-full py-3.5 rounded-xl font-black text-white text-base
-                             transition-all active:scale-95 shadow-md"
-                  style={{
-                    background: saved
-                      ? 'linear-gradient(135deg,#22c55e,#16a34a)'
-                      : `linear-gradient(135deg,#004b8d,#1a6db5)`,
-                    boxShadow: saved ? '0 4px 20px #22c55e44' : '0 4px 20px #004b8d44',
-                  }}>
-                  {saved ? '✓ 저장됨!' : '오늘 기록 저장'}
-                </button>
-              </>
-            )}
-          </div>
+              <p className="text-xs mb-4 pl-7" style={{ color: th.textSub }}>{today}</p>
 
-          {/* 이번 주 기록 */}
-          <div className="rounded-2xl bg-white border border-slate-200/80 p-5 shadow-lg flex flex-col">
-            <div className="flex justify-between items-start mb-5">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">📅</span>
-                <div>
-                  <h2 className="font-black text-slate-800 text-lg">이번 주 기록</h2>
-                  <p className="text-slate-400 text-xs mt-0.5">최근 7일</p>
-                </div>
-              </div>
-              <div className="flex gap-1.5">
-                <button onClick={handleExport}
-                  className="text-xs text-blue-600 hover:text-blue-700 py-1.5 px-2.5 rounded-xl
-                             hover:bg-blue-50 font-semibold transition-colors">
-                  💾
-                </button>
-                <button onClick={handleReset}
-                  className="text-xs text-red-400 hover:text-red-500 py-1.5 px-2.5 rounded-xl
-                             hover:bg-red-50 transition-colors">
-                  초기화
-                </button>
-              </div>
-            </div>
-
-            {/* 7일 달력 */}
-            <div className="grid grid-cols-7 gap-1 mb-4">
-              {last7Days.map((date) => {
-                const rec     = records.find((r) => r.date === date);
-                const d       = new Date(date + 'T00:00:00');
-                const isToday = date === today;
-                const isSat   = d.getDay() === 6;
-                const isSun   = d.getDay() === 0;
-                return (
-                  <div key={date}
-                    className={`flex flex-col items-center rounded-xl py-2.5 px-0.5 border transition-colors ${
-                      isToday ? 'bg-blue-50 border-blue-200 shadow-sm' : 'bg-slate-50 border-slate-100'
-                    }`}>
-                    <span className={`text-[11px] font-bold mb-0.5 ${isSun?'text-red-400':isSat?'text-blue-500':'text-slate-400'}`}>
-                      {DAY_KO[d.getDay()]}
-                    </span>
-                    <span className="text-[9px] text-slate-300 mb-1.5">
-                      {date.slice(5).replace('-','/')}
-                    </span>
-                    {rec ? (
-                      <div className="flex flex-col items-center gap-0.5">
-                        <div className="flex flex-wrap justify-center gap-0.5">
-                          {[1,2,3,4,5].map((n) => (
-                            <span key={n} className="text-[10px]"
-                              style={{ filter: n<=rec.score ? 'none' : 'grayscale(1) opacity(0.15)' }}>⭐</span>
-                          ))}
-                        </div>
-                        <span className="text-[10px] font-black text-amber-500">{rec.score}점</span>
-                      </div>
-                    ) : (
-                      <span className="text-slate-200 text-base">—</span>
-                    )}
+              {todayRec ? (
+                <div className="flex flex-col items-center justify-center py-5 gap-3">
+                  <div className="w-14 h-14 rounded-full border-2 flex items-center justify-center text-2xl shadow-sm"
+                    style={{ background: th.checkBg, borderColor: th.checkBorder }}>✅</div>
+                  <p className="font-bold text-base" style={{ color: th.checkText }}>오늘 기록 완료!</p>
+                  <div className="flex gap-1">
+                    {[1,2,3,4,5].map((n) => (
+                      <span key={n} className="text-2xl"
+                        style={{ filter: n<=todayRec.score ? 'drop-shadow(0 0 4px #f59e0b)' : 'grayscale(1) opacity(0.25)' }}>
+                        ⭐
+                      </span>
+                    ))}
                   </div>
-                );
-              })}
-            </div>
-
-            {/* 메모 목록 */}
-            <div className="flex-1 overflow-y-auto space-y-1.5">
-              {last7Days
-                .map((date) => records.find((r) => r.date === date))
-                .filter((r): r is DayRecord => !!r && !!r.note)
-                .reverse()
-                .map((r) => (
-                  <div key={r.date} className="flex gap-2 items-start bg-slate-50 rounded-xl px-3 py-2.5 border border-slate-100">
-                    <span className="text-xs text-slate-300 shrink-0 mt-0.5 w-10">
-                      {r.date.slice(5).replace('-','/')}
-                    </span>
-                    <span className="text-xs text-slate-500 leading-relaxed italic">"{r.note}"</span>
-                  </div>
-                ))}
-              {last7Days.every((date) => { const r = records.find((rc) => rc.date === date); return !r || !r.note; }) && (
-                <p className="text-slate-300 text-xs text-center py-3">이번 주 메모가 없습니다.</p>
+                  {todayRec.note && (
+                    <p className="text-sm text-center italic" style={{ color: th.textSub }}>"{todayRec.note}"</p>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <StarPicker value={score} onChange={setScore} />
+                  <textarea
+                    className="w-full rounded-xl p-3 text-sm resize-none mt-4 border focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    style={{
+                      background: th.inputBg, borderColor: th.inputBorder,
+                      color: th.inputText,
+                    }}
+                    rows={3}
+                    placeholder="오늘 하루 한 마디 (선택)"
+                    value={note} onChange={(e) => setNote(e.target.value)}
+                  />
+                  <button onClick={handleSave}
+                    className="mt-3 w-full py-3.5 rounded-xl font-black text-base active:scale-95 transition-all"
+                    style={{
+                      background: saved ? th.savedBtn : th.saveBtn,
+                      boxShadow: saved ? th.savedShadow : th.saveShadow,
+                      color: themeId === 'dark' && !saved ? '#0a1628' : '#ffffff',
+                    }}>
+                    {saved ? '✓ 저장됨!' : '오늘 기록 저장'}
+                  </button>
+                </>
               )}
             </div>
+
+            {/* 이번 주 기록 */}
+            <div className="rounded-2xl p-5 border shadow-lg flex flex-col transition-colors duration-300"
+              style={{ background: th.cardBg, borderColor: th.cardBorder }}>
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">📅</span>
+                  <div>
+                    <h2 className="font-black text-lg" style={{ color: th.textH }}>이번 주 기록</h2>
+                    <p className="text-xs mt-0.5" style={{ color: th.textSub }}>최근 7일</p>
+                  </div>
+                </div>
+                <div className="flex gap-1.5">
+                  <button onClick={handleExport}
+                    className="text-xs py-1.5 px-2.5 rounded-xl font-semibold transition-colors"
+                    style={{ color: '#3b82f6' }}>💾</button>
+                  <button onClick={handleReset}
+                    className="text-xs py-1.5 px-2.5 rounded-xl transition-colors"
+                    style={{ color: '#f87171' }}>초기화</button>
+                </div>
+              </div>
+
+              {/* 7일 달력 */}
+              <div className="grid grid-cols-7 gap-1 mb-4">
+                {last7Days.map((date) => {
+                  const rec     = records.find((r) => r.date === date);
+                  const d       = new Date(date + 'T00:00:00');
+                  const isToday = date === today;
+                  const isSat   = d.getDay() === 6;
+                  const isSun   = d.getDay() === 0;
+                  return (
+                    <div key={date}
+                      className="flex flex-col items-center rounded-xl py-2.5 px-0.5 border transition-colors"
+                      style={{
+                        background: isToday ? th.calToday : th.calRow,
+                        borderColor: isToday ? th.calTodayBorder : th.calBorder,
+                      }}>
+                      <span className="text-[11px] font-bold mb-0.5"
+                        style={{ color: isSun ? '#f87171' : isSat ? '#60a5fa' : th.textSub }}>
+                        {DAY_KO[d.getDay()]}
+                      </span>
+                      <span className="text-[9px] mb-1.5" style={{ color: th.rowDate }}>
+                        {date.slice(5).replace('-','/')}
+                      </span>
+                      {rec ? (
+                        <div className="flex flex-col items-center gap-0.5">
+                          <div className="flex flex-wrap justify-center gap-0.5">
+                            {[1,2,3,4,5].map((n) => (
+                              <span key={n} className="text-[10px]"
+                                style={{ filter: n<=rec.score ? 'none' : 'grayscale(1) opacity(0.15)' }}>⭐</span>
+                            ))}
+                          </div>
+                          <span className="text-[10px] font-black" style={{ color: th.starLabel }}>{rec.score}점</span>
+                        </div>
+                      ) : (
+                        <span className="text-base" style={{ color: th.calBorder }}>—</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* 메모 */}
+              <div className="flex-1 overflow-y-auto space-y-1.5">
+                {last7Days
+                  .map((date) => records.find((r) => r.date === date))
+                  .filter((r): r is DayRecord => !!r && !!r.note)
+                  .reverse()
+                  .map((r) => (
+                    <div key={r.date} className="flex gap-2 items-start rounded-xl px-3 py-2.5 border"
+                      style={{ background: th.rowBg, borderColor: th.rowBorder }}>
+                      <span className="text-xs shrink-0 mt-0.5 w-10" style={{ color: th.rowDate }}>
+                        {r.date.slice(5).replace('-','/')}
+                      </span>
+                      <span className="text-xs leading-relaxed italic" style={{ color: th.rowText }}>"{r.note}"</span>
+                    </div>
+                  ))}
+                {last7Days.every((date) => { const r = records.find((rc) => rc.date===date); return !r||!r.note; }) && (
+                  <p className="text-xs text-center py-3" style={{ color: th.rowDate }}>이번 주 메모가 없습니다.</p>
+                )}
+              </div>
+            </div>
           </div>
 
+          {/* 푸터 */}
+          <p className="text-xs mt-6 text-center tracking-wide" style={{ color: th.footerText }}>
+            데이터는 이 기기에 저장됩니다 · 💾 버튼으로 JSON 백업 가능
+          </p>
         </div>
-
-        {/* 푸터 */}
-        <p className="text-slate-300 text-xs mt-8 text-center tracking-wide">
-          데이터는 이 기기에 저장됩니다 · 💾 버튼으로 JSON 백업 가능
-        </p>
       </div>
-    </div>
+    </ThemeCtx.Provider>
   );
 }
